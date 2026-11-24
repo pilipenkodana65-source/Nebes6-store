@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NEBES 6 — Store</title>
+  <!-- Подключение Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Подключение Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Шрифт Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            bg: '#0a0a0a',
+            surface: '#141414',
+            surfaceHover: '#1c1c1c',
+            border: '#262626',
+            muted: '#888888',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Базовые настройки для мобильного WebApp */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0a0a0a;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Скрытие скроллбара для горизонтальных вкладок */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Плавные анимации модальных окон */
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0.5;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .animate-slide-up {
+      animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-[#0a0a0a] text-white min-h-screen flex flex-col selection:bg-white selection:text-black">
+
+  <!-- Уведомление (Toast) вместо alert() -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+    <div class="bg-white text-black text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl border border-neutral-300 flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+      <span id="toast-message">Добавлено в корзину</span>
+    </div>
+  </div>
+
+  <!-- Шапка приложения (Header) -->
+  <header class="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#262626] px-4 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-2 h-2 bg-white"></div>
+      <h1 class="text-base font-bold tracking-[0.22em] uppercase">NEBES 6</h1>
+    </div>
+
+    <!-- Кнопка корзины -->
+    <button
+      onclick="openCart()"
+      aria-label="Открыть корзину"
+      class="relative flex items-center gap-2 bg-[#141414] hover:bg-[#1c1c1c] active:scale-95 transition-all border border-[#262626] px-3.5 py-2 rounded-lg"
+    >
+      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      <span class="text-xs font-medium tracking-wider uppercase">Корзина</span>
+      <span id="cart-badge" class="bg-white text-black text-[11px] font-bold px-1.5 py-0.5 rounded-sm min-w-[20px] text-center leading-none">
+        0
+      </span>
+    </button>
+  </header>
+
+  <!-- Панель фильтрации по категориям -->
+  <nav class="sticky top-[57px] z-20 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#1c1c1c] px-4 py-3">
+    <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <!-- Вкладки рендерятся через JS -->
+    </div>
+  </nav>
+
+  <!-- Основной контент: Сетка товаров -->
+  <main class="flex-1 px-4 py-5 max-w-2xl mx-auto w-full">
+    <div class="flex items-center justify-between mb-4">
+      <p id="collection-subtitle" class="text-xs uppercase tracking-[0.15em] text-[#888888]">DROP 01 // MONOCHROME</p>
+      <span id="items-count" class="text-xs text-[#888888]">6 позиций</span>
+    </div>
+
+    <div id="product-grid" class="grid grid-cols-2 gap-3 sm:gap-4">
+      <!-- Карточки товаров рендерятся через JS -->
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="border-t border-[#1c1c1c] py-6 px-4 text-center mt-8">
+    <p class="text-[11px] tracking-[0.2em] uppercase text-[#888888]">NEBES 6 STUDIO &copy; 2026</p>
+    <p class="text-[10px] text-[#555555] mt-1">Доставка по Украине • Новая Почта</p>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- МОДАЛЬНОЕ ОКНО: ДЕТАЛИ ТОВАРА (DRAWER)     -->
+  <!-- ========================================== -->
+  <div id="product-modal" class="fixed inset-0 z-40 hidden">
+    <!-- Затемнение фона -->
+    <div onclick="closeProductModal()" class="absolute inset-0 bg-black/80 backdrop-blur-xs animate-fade-in"></div>
+
+    <!-- Контент карточки -->
+    <div class="absolute bottom-0 left-0 right-0 max-w-lg mx-auto bg-[#141414] border-t border-x border-[#262626] rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto animate-slide-up">
+      <!-- Индикатор свайпа и кнопка закрытия -->
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-[10px] uppercase tracking-[0.2em] text-[#888888]" id="modal-category">КАТЕГОРИЯ</span>
+        <button onclick="closeProductModal()" class="p-2 -mr-2 text-[#888888] hover:text-white transition-colors" aria-label="Закрыть">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Превью изображения / SVG -->
+      <div id="modal-image-container" class="w-full aspect-[4/3] bg-[#0a0a0a] border border-[#262626] rounded-xl overflow-hidden mb-4 flex items-center justify-center relative">
+        <!-- SVG иллюстрация товара -->
+      </div>
+
+      <!-- Название и цена -->
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <h2 id="modal-title" class="text-lg font-semibold tracking-tight text-white">Название товара</h2>
+        <span id="modal-price" class="text-lg font-bold text-white whitespace-nowrap">0 грн</span>
+      </div>
+
+      <!-- Описание -->
+      <p id="modal-description" class="text-xs leading-relaxed text-[#888888] mb-5">
+        Описание товара...
+      </p>
+
+      <!-- Выбор размера -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs uppercase tracking-wider text-white font-medium">Выберите размер</span>
+          <span class="text-[11px] text-[#888888]">Oversize fit</span>
+        </div>
+        <div id="size-selector" class="grid grid-cols-4 gap-2">
+          <!-- Кнопки размеров S, M, L, XL -->
+        </div>
+      </div>
+
+      <!-- Кнопка добавления в корзину -->
+      <button
+        id="modal-add-btn"
+        onclick="addToCartFromModal()"
+        class="w-full bg-white text-black hover:bg-neutral-200 active:scale-[0.99] transition-all font-semibold text-xs uppercase tracking-[0.15em] py-4 rounded-xl flex items-center justify-center gap-2"
+      >
+        <span>Добавить в корзину</span>
+        <span>•</span>
+        <span id="modal-btn-price">0 грн</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- МОДАЛЬНОЕ ОКНО: КОРЗИНА И ОФОРМЛЕНИЕ       -->
+  <!-- ========================================== -->
+  <div id="cart-modal" class="fixed inset-0 z-40 hidden">
+    <div onclick="closeCart()" class="absolute inset-0 bg-black/80 backdrop-blur-xs animate-fade-in"></div>
+
+    <div class="absolute bottom-0 left-0 right-0 max-w-lg mx-auto bg-[#141414] border-t border-x border-[#262626] rounded-t-2xl flex flex-col max-h-[92vh] animate-slide-up">
+      <!-- Шапка корзины -->
+      <div class="px-5 py-4 border-b border-[#262626] flex items-center justify-between shrink-0">
+        <div>
+          <h2 class="text-sm font-bold uppercase tracking-[0.18em]">Ваш заказ</h2>
+          <p id="cart-subtitle" class="text-[11px] text-[#888888] mt-0.5">0 товаров</p>
+        </div>
+        <button onclick="closeCart()" class="p-2 -mr-2 text-[#888888] hover:text-white transition-colors" aria-label="Закрыть корзину">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Тело корзины (скроллируемое) -->
+      <div id="cart-body" class="p-5 overflow-y-auto flex-1 space-y-6">
+        <!-- Список товаров в корзине -->
+        <div id="cart-items-list" class="space-y-3">
+          <!-- Элементы корзины рендерятся через JS -->
+        </div>
+
+        <!-- Форма оформления заказа (скрывается, если корзина пуста) -->
+        <form id="checkout-form" onsubmit="submitOrder(event)" class="space-y-4 pt-4 border-t border-[#262626]">
+          <h3 class="text-xs font-semibold uppercase tracking-[0.15em] text-white">Данные для доставки</h3>
+
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-[#888888] mb-1.5">Имя и Фамилия *</label>
+            <input
+              type="text"
+              id="order-name"
+              required
+              placeholder="Александр Коваленко"
+              class="w-full bg-[#0a0a0a] border border-[#262626] focus:border-white rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-[#555555] outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-[#888888] mb-1.5">Телефон или @Telegram *</label>
+            <input
+              type="text"
+              id="order-contact"
+              required
+              placeholder="+380 99 000 00 00 / @username"
+              class="w-full bg-[#0a0a0a] border border-[#262626] focus:border-white rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-[#555555] outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-[#888888] mb-1.5">Город и отделение Новой Почты *</label>
+            <input
+              type="text"
+              id="order-delivery"
+              required
+              placeholder="г. Киев, отделение №12"
+              class="w-full bg-[#0a0a0a] border border-[#262626] focus:border-white rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-[#555555] outline-none transition-colors"
+            />
+          </div>
+
+          <!-- Итоговая сумма -->
+          <div class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-4 space-y-2">
+            <div class="flex justify-between text-xs text-[#888888]">
+              <span>Доставка (Новая Почта)</span>
+              <span>По тарифам перевозчика</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-[#1c1c1c]">
+              <span class="text-xs uppercase tracking-wider font-medium text-white">Итого к оплате</span>
+              <span id="cart-total-price" class="text-base font-bold text-white">0 грн</span>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-white text-black hover:bg-neutral-200 active:scale-[0.99] transition-all font-semibold text-xs uppercase tracking-[0.15em] py-4 rounded-xl"
+          >
+            Оформить заказ
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- МОДАЛЬНОЕ ОКНО: ПОДТВЕРЖДЕНИЕ ЗАКАЗА       -->
+  <!-- ========================================== -->
+  <div id="confirmation-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-sm animate-fade-in"></div>
+    <div class="relative bg-[#141414] border border-[#262626] rounded-2xl p-6 max-w-sm w-full text-center animate-slide-up">
+      <div class="w-12 h-12 rounded-full bg-white text-black mx-auto flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h3 class="text-base font-bold uppercase tracking-[0.15em] mb-1">Заказ принят</h3>
+      <p class="text-xs text-[#888888] mb-4">Менеджер NEBES 6 свяжется с вами в ближайшее время для подтверждения.</p>
+
+      <div id="order-summary-box" class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-3.5 text-left text-xs space-y-2 mb-5">
+        <!-- Детали оформленного заказа -->
+      </div>
+
+      <button
+        onclick="closeConfirmation()"
+        class="w-full bg-white text-black hover:bg-neutral-200 font-semibold text-xs uppercase tracking-[0.15em] py-3.5 rounded-xl transition-all"
+      >
+        Вернуться в каталог
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ЛОГИКА ПРИЛОЖЕНИЯ (JAVASCRIPT)             -->
+  <!-- ========================================== -->
+  <script>
+    // 1. Инициализация Telegram WebApp SDK
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      // Настройка цветов хедера и фона в Telegram
+      try {
+        tg.setHeaderColor('#0a0a0a');
+        tg.setBackgroundColor('#0a0a0a');
+      } catch (e) {
+        console.warn('Telegram theme color methods not supported in this version');
+      }
+    }
+
+    // 2. Генератор стильных монохромных векторных иллюстраций одежды
+    function getProductArtwork(type, code) {
+      const commonBg = `
+        <svg viewBox="0 0 240 260" class="w-full h-full object-cover" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="glow-${code}" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#222222" />
+              <stop offset="100%" stop-color="#0a0a0a" />
+            </radialGradient>
+            <pattern id="grid-${code}" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#181818" stroke-width="0.6"/>
+            </pattern>
+          </defs>
+          <rect width="240" height="260" fill="url(#glow-${code})" />
+          <rect width="240" height="260" fill="url(#grid-${code})" />
+          <text x="14" y="24" fill="#444444" font-family="monospace" font-size="9" letter-spacing="2">NEBES 6 // ${code}</text>
+      `;
+
+      const commonFooter = `
+          <line x1="14" y1="242" x2="226" y2="242" stroke="#222222" stroke-width="1" />
+          <text x="14" y="253" fill="#555555" font-family="monospace" font-size="8" letter-spacing="1.5">ARCHIVE COLLECTION</text>
+        </svg>
+      `;
+
+      const silhouettes = {
+        jacket: `
+          <!-- Техническая куртка / Пуховик -->
+          <path d="M85 52 L105 46 L135 46 L155 52 L188 78 L175 168 L156 165 L156 205 L84 205 L84 165 L65 168 L52 78 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M105 46 L120 64 L135 46" fill="none" stroke="#ffffff" stroke-width="1.4"/>
+          <line x1="120" y1="64" x2="120" y2="205" stroke="#ffffff" stroke-width="1.2"/>
+          <line x1="84" y1="102" x2="156" y2="102" stroke="#333333" stroke-width="1"/>
+          <line x1="84" y1="138" x2="156" y2="138" stroke="#333333" stroke-width="1"/>
+          <line x1="84" y1="172" x2="156" y2="172" stroke="#333333" stroke-width="1"/>
+          <rect x="94" y="148" width="16" height="20" fill="none" stroke="#777777" stroke-width="1"/>
+          <rect x="130" y="148" width="16" height="20" fill="none" stroke="#777777" stroke-width="1"/>
+        `,
+        hoodie: `
+          <!-- Оверсайз худи -->
+          <path d="M92 58 C92 42, 148 42, 148 58 L184 80 L172 172 L152 169 L152 204 L88 204 L88 169 L68 172 L56 80 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M96 58 Q120 78 144 58" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+          <line x1="113" y1="68" x2="113" y2="92" stroke="#888888" stroke-width="1.2"/>
+          <line x1="127" y1="68" x2="127" y2="92" stroke="#888888" stroke-width="1.2"/>
+          <path d="M96 155 L144 155 L148 194 L92 194 Z" fill="#111111" stroke="#555555" stroke-width="1.1"/>
+          <text x="120" y="122" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="10" letter-spacing="3">NEBES 6</text>
+        `,
+        pants: `
+          <!-- Широкие карго брюки -->
+          <path d="M84 52 L156 52 L166 208 L130 208 L120 112 L110 208 L74 208 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+          <line x1="84" y1="66" x2="156" y2="66" stroke="#555555" stroke-width="1"/>
+          <line x1="120" y1="52" x2="120" y2="92" stroke="#555555" stroke-width="1"/>
+          <rect x="74" y="114" width="16" height="32" fill="#0f0f0f" stroke="#888888" stroke-width="1.1"/>
+          <rect x="150" y="114" width="16" height="32" fill="#0f0f0f" stroke="#888888" stroke-width="1.1"/>
+          <line x1="76" y1="196" x2="110" y2="196" stroke="#555555" stroke-width="1"/>
+          <line x1="130" y1="196" x2="164" y2="196" stroke="#555555" stroke-width="1"/>
+        `,
+        bag: `
+          <!-- Кросс-боди сумка -->
+          <path d="M72 95 Q120 35 168 95" fill="none" stroke="#888888" stroke-width="2" stroke-dasharray="4 2"/>
+          <rect x="68" y="95" width="104" height="88" rx="6" fill="#141414" stroke="#ffffff" stroke-width="1.5"/>
+          <line x1="68" y1="125" x2="172" y2="125" stroke="#ffffff" stroke-width="1.2"/>
+          <rect x="112" y="120" width="16" height="10" fill="#ffffff"/>
+          <text x="120" y="158" text-anchor="middle" fill="#888888" font-family="monospace" font-size="9" letter-spacing="2">N6-UNIT</text>
+        `,
+        trench: `
+          <!-- Минималистичное пальто / тренч -->
+          <path d="M90 48 L150 48 L182 76 L170 176 L154 174 L158 214 L82 214 L86 174 L70 176 L58 76 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M95 48 L120 88 L145 48" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+          <line x1="120" y1="88" x2="120" y2="214" stroke="#666666" stroke-width="1.1"/>
+          <circle cx="112" cy="108" r="2" fill="#ffffff"/>
+          <circle cx="128" cy="108" r="2" fill="#ffffff"/>
+          <circle cx="112" cy="134" r="2" fill="#ffffff"/>
+          <circle cx="128" cy="134" r="2" fill="#ffffff"/>
+        `,
+        cap: `
+          <!-- Кепка / Балаклава -->
+          <path d="M72 135 C72 88, 168 88, 168 135 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5"/>
+          <path d="M62 135 Q120 152 178 135 L168 144 Q120 160 72 144 Z" fill="#1c1c1c" stroke="#ffffff" stroke-width="1.3"/>
+          <line x1="120" y1="99" x2="120" y2="135" stroke="#444444" stroke-width="1"/>
+          <text x="120" y="122" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="11" letter-spacing="2">N6</text>
+        `
+      };
+
+      return commonBg + (silhouettes[type] || silhouettes.hoodie) + commonFooter;
+    }
+
+    // 3. Каталог товаров бренда NEBES 6
+    const products = [
+      {
+        id: 1,
+        code: '01-OW',
+        name: 'Пуховик NEBES 6 Void Puffer',
+        category: 'Верхняя одежда',
+        price: 5400,
+        artwork: 'jacket',
+        description: 'Объёмный зимний пуховик из матового водоотталкивающего нейлона. Наполнитель био-пух до -20°C, высокий воротник-стойка, скрытая фурнитура и утяжки по низу.'
+      },
+      {
+        id: 2,
+        code: '02-HD',
+        name: 'Худи Heavyweight Boxy Black',
+        category: 'Худи',
+        price: 2650,
+        artwork: 'hoodie',
+        description: 'Укороченный оверсайз-силуэт из плотного футера 480 г/м² (100% хлопок). Глубокий двойной капюшон, спущенная линия плеча, минималистичный принт NEBES 6.'
+      },
+      {
+        id: 3,
+        code: '03-PT',
+        name: 'Брюки Parachute Cargo 06',
+        category: 'Брюки',
+        price: 2900,
+        artwork: 'pants',
+        description: 'Широкие карго-брюки свободного кроя из износостойкого хлопкового рипстопа. Объёмные накладные карманы, фиксаторы ширины штанин внизу.'
+      },
+      {
+        id: 4,
+        code: '04-AC',
+        name: 'Сумка Crossbody Tactical N6',
+        category: 'Аксессуары',
+        price: 1350,
+        artwork: 'bag',
+        description: 'Компактная сумка через плечо из баллистического нейлона Cordura. Металлический фастекс, водонепроницаемые молнии YKK, внутренний органайзер.'
+      },
+      {
+        id: 5,
+        code: '05-OW',
+        name: 'Пальто-тренч Shadow Coat',
+        category: 'Верхняя одежда',
+        price: 4800,
+        artwork: 'trench',
+        description: 'Двубортный минималистичный тренч прямого кроя из плотной костюмной ткани с ветрозащитной пропиткой. Идеальная посадка поверх худи.'
+      },
+      {
+        id: 6,
+        code: '06-AC',
+        name: 'Кепка Distressed Monogram',
+        category: 'Аксессуары',
+        price: 950,
+        artwork: 'cap',
+        description: 'Шестиклинка из вываренного плотного денима графитового оттенка с объёмной 3D-вышивкой логотипа N6 и металлической застёжкой.'
+      }
+    ];
+
+    const categories = ['Все', 'Верхняя одежда', 'Худи', 'Брюки', 'Аксессуары'];
+    const sizes = ['S', 'M', 'L', 'XL'];
+
+    // 4. Состояние приложения
+    let activeCategory = 'Все';
+    let selectedProduct = null;
+    let selectedSize = 'L';
+    let cart = []; // [{ productId, name, price, size, qty, artwork, code }]
+
+    // Попытка загрузить корзину из localStorage
+    try {
+      const savedCart = localStorage.getItem('nebes6_cart');
+      if (savedCart) cart = JSON.parse(savedCart);
+    } catch (e) {}
+
+    // 5. Инициализация интерфейса при загрузке
+    function initApp() {
+      renderCategories();
+      renderProducts();
+      updateCartBadge();
+
+      // Автозаполнение имени из данных пользователя Telegram, если доступно
+      if (tg?.initDataUnsafe?.user) {
+        const user = tg.initDataUnsafe.user;
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+        if (fullName) {
+          document.getElementById('order-name').value = fullName;
+        }
+        if (user.username) {
+          document.getElementById('order-contact').value = `@${user.username}`;
+        }
+      }
+    }
+
+    // 6. Рендер вкладок категорий
+    function renderCategories() {
+      const container = document.getElementById('category-tabs');
+      container.innerHTML = categories
+        .map((cat) => {
+          const isActive = cat === activeCategory;
+          return `
+            <button
+              onclick="selectCategory('${cat}')"
+              class="px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                isActive
+                  ? 'bg-white text-black border-white'
+                  : 'bg-[#141414] text-[#888888] border-[#262626] hover:text-white hover:border-[#444444]'
+              }"
+            >
+              ${cat}
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function selectCategory(category) {
+      activeCategory = category;
+      triggerHaptic('selection');
+      renderCategories();
+      renderProducts();
+    }
+
+    // 7. Рендер сетки товаров
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      const filtered =
+        activeCategory === 'Все'
+          ? products
+          : products.filter((p) => p.category === activeCategory);
+
+      document.getElementById('items-count').textContent = `${filtered.length} ${getNoun(
+        filtered.length,
+        'позиция',
+        'позиции',
+        'позиций'
+      )}`;
+
+      grid.innerHTML = filtered
+        .map(
+          (product) => `
+          <div
+            onclick="openProductModal(${product.id})"
+            class="group bg-[#141414] border border-[#262626] hover:border-[#555555] rounded-xl overflow-hidden flex flex-col cursor-pointer transition-all active:scale-[0.98]"
+          >
+            <!-- Изображение товара -->
+            <div class="aspect-[4/4.3] bg-[#0a0a0a] relative overflow-hidden border-b border-[#1f1f1f]">
+              ${getProductArtwork(product.artwork, product.code)}
+              <button
+                onclick="event.stopPropagation(); quickAdd(${product.id})"
+                aria-label="Быстро добавить"
+                class="absolute bottom-2.5 right-2.5 w-8 h-8 rounded-lg bg-white/95 text-black hover:bg-white flex items-center justify-center shadow-lg transition-transform active:scale-90"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Информация о товаре -->
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-[#888888] block mb-1">${product.category}</span>
+                <h3 class="text-xs sm:text-sm font-medium text-white leading-snug line-clamp-2 mb-2">${product.name}</h3>
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-xs sm:text-sm font-bold text-white">${formatPrice(product.price)}</span>
+                <span class="text-[10px] text-[#888888] group-hover:text-white transition-colors">Выбрать →</span>
+              </div>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    // 8. Модальное окно деталей товара
+    function openProductModal(productId) {
+      selectedProduct = products.find((p) => p.id === productId);
+      if (!selectedProduct) return;
+
+      selectedSize = 'L'; // Размер по умолчанию
+      triggerHaptic('impact', 'light');
+
+      document.getElementById('modal-category').textContent = selectedProduct.category;
+      document.getElementById('modal-title').textContent = selectedProduct.name;
+      document.getElementById('modal-price').textContent = formatPrice(selectedProduct.price);
+      document.getElementById('modal-btn-price').textContent = formatPrice(selectedProduct.price);
+      document.getElementById('modal-description').textContent = selectedProduct.description;
+      document.getElementById('modal-image-container').innerHTML = getProductArtwork(
+        selectedProduct.artwork,
+        selectedProduct.code
+      );
+
+      renderSizeSelector();
+      document.getElementById('product-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function renderSizeSelector() {
+      const container = document.getElementById('size-selector');
+      container.innerHTML = sizes
+        .map((size) => {
+          const isSelected = size === selectedSize;
+          return `
+            <button
+              type="button"
+              onclick="selectSize('${size}')"
+              class="py-2.5 rounded-lg text-xs font-semibold border transition-all ${
+                isSelected
+                  ? 'bg-white text-black border-white'
+                  : 'bg-[#0a0a0a] text-[#888888] border-[#262626] hover:border-[#555555] hover:text-white'
+              }"
+            >
+              ${size}
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function selectSize(size) {
+      selectedSize = size;
+      triggerHaptic('selection');
+      renderSizeSelector();
+    }
+
+    // 9. Управление корзиной
+    function quickAdd(productId) {
+      const product = products.find((p) => p.id === productId);
+      if (!product) return;
+      addItemToCart(product, 'L');
+      showToast(`${product.name} (L) добавлен`);
+    }
+
+    function addToCartFromModal() {
+      if (!selectedProduct) return;
+      addItemToCart(selectedProduct, selectedSize);
+      closeProductModal();
+      showToast(`Добавлено: ${selectedProduct.name} (${selectedSize})`);
+    }
+
+    function addItemToCart(product, size) {
+      triggerHaptic('notification', 'success');
+      const existingIndex = cart.findIndex(
+        (item) => item.productId === product.id && item.size === size
+      );
+
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += 1;
+      } else {
+        cart.push({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          size: size,
+          qty: 1,
+          artwork: product.artwork,
+          code: product.code
+        });
+      }
+
+      saveCart();
+      updateCartBadge();
+    }
+
+    function updateItemQty(index, delta) {
+      triggerHaptic('impact', 'light');
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      }
+      saveCart();
+      updateCartBadge();
+      renderCartItems();
+    }
+
+    function removeItemFromCart(index) {
+      triggerHaptic('impact', 'medium');
+      cart.splice(index, 1);
+      saveCart();
+      updateCartBadge();
+      renderCartItems();
+    }
+
+    function saveCart() {
+      try {
+        localStorage.setItem('nebes6_cart', JSON.stringify(cart));
+      } catch (e) {}
+    }
+
+    function updateCartBadge() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cart-badge').textContent = totalCount;
+    }
+
+    function openCart() {
+      triggerHaptic('impact', 'light');
+      renderCartItems();
+      document.getElementById('cart-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCart() {
+      document.getElementById('cart-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function renderCartItems() {
+      const listContainer = document.getElementById('cart-items-list');
+      const checkoutForm = document.getElementById('checkout-form');
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalSum = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+      document.getElementById('cart-subtitle').textContent = `${totalQty} ${getNoun(
+        totalQty,
+        'товар',
+        'товара',
+        'товаров'
+      )}`;
+      document.getElementById('cart-total-price').textContent = formatPrice(totalSum);
+
+      if (cart.length === 0) {
+        checkoutForm.classList.add('hidden');
+        listContainer.innerHTML = `
+          <div class="py-12 text-center">
+            <div class="w-12 h-12 rounded-full bg-[#0a0a0a] border border-[#262626] mx-auto flex items-center justify-center mb-3 text-[#888888]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-white mb-1">Корзина пуста</p>
+            <p class="text-xs text-[#888888] mb-5">Добавьте вещи из каталога NEBES 6</p>
+            <button
+              onclick="closeCart()"
+              class="bg-white text-black text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-lg"
+            >
+              Перейти в каталог
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      checkoutForm.classList.remove('hidden');
+      listContainer.innerHTML = cart
+        .map(
+          (item, index) => `
+          <div class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-3 flex items-center gap-3">
+            <!-- Миниатюра -->
+            <div class="w-16 h-16 rounded-lg overflow-hidden border border-[#1f1f1f] shrink-0">
+              ${getProductArtwork(item.artwork, item.code)}
+            </div>
+
+            <!-- Описание позиции -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <h4 class="text-xs font-medium text-white truncate">${item.name}</h4>
+                <button
+                  type="button"
+                  onclick="removeItemFromCart(${index})"
+                  aria-label="Удалить"
+                  class="text-[#666666] hover:text-white transition-colors p-0.5"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <span class="inline-block text-[10px] uppercase tracking-wider text-[#888888] bg-[#141414] border border-[#262626] px-1.5 py-0.5 rounded mt-1">
+                Размер: ${item.size}
+              </span>
+
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-xs font-bold text-white">${formatPrice(item.price * item.qty)}</span>
+
+                <!-- Контрол количества -->
+                <div class="flex items-center bg-[#141414] border border-[#262626] rounded-lg">
+                  <button
+                    type="button"
+                    onclick="updateItemQty(${index}, -1)"
+                    class="w-7 h-6 flex items-center justify-center text-xs text-[#888888] hover:text-white"
+                  >
+                    −
+                  </button>
+                  <span class="text-xs font-medium px-2 text-white">${item.qty}</span>
+                  <button
+                    type="button"
+                    onclick="updateItemQty(${index}, 1)"
+                    class="w-7 h-6 flex items-center justify-center text-xs text-[#888888] hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    // 10. Оформление заказа и отправка данных в Telegram Bot
+    function submitOrder(event) {
+      event.preventDefault();
+      if (cart.length === 0) return;
+
+      const name = document.getElementById('order-name').value.trim();
+      const contact = document.getElementById('order-contact').value.trim();
+      const delivery = document.getElementById('order-delivery').value.trim();
+      const totalSum = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+      const orderPayload = {
+        brand: 'NEBES 6',
+        customer: { name, contact, delivery },
+        items: cart.map((i) => ({
+          id: i.productId,
+          name: i.name,
+          size: i.size,
+          qty: i.qty,
+          price: i.price
+        })),
+        total_uah: totalSum,
+        timestamp: new Date().toISOString()
+      };
+
+      triggerHaptic('notification', 'success');
+
+      // Если приложение запущено внутри Telegram как Keyboard WebApp — отправляем данные боту
+      if (tg && tg.initData) {
+        try {
+          tg.sendData(JSON.stringify(orderPayload));
+        } catch (err) {
+          console.warn('tg.sendData available only for keyboard-launched web apps:', err);
+        }
+      }
+
+      // Показываем экран подтверждения заказа
+      showOrderConfirmation(orderPayload);
+
+      // Очищаем корзину
+      cart = [];
+      saveCart();
+      updateCartBadge();
+      closeCart();
+    }
+
+    function showOrderConfirmation(order) {
+      const summaryBox = document.getElementById('order-summary-box');
+      const itemsHtml = order.items
+        .map(
+          (i) => `
+          <div class="flex justify-between text-[#cccccc]">
+            <span>${i.name} (${i.size}) × ${i.qty}</span>
+            <span class="font-medium">${formatPrice(i.price * i.qty)}</span>
+          </div>
+        `
+        )
+        .join('');
+
+      summaryBox.innerHTML = `
+        <div class="pb-2 border-b border-[#1c1c1c] space-y-1">
+          <div><span class="text-[#888888]">Получатель:</span> <span class="text-white">${escapeHtml(order.customer.name)}</span></div>
+          <div><span class="text-[#888888]">Контакт:</span> <span class="text-white">${escapeHtml(order.customer.contact)}</span></div>
+          <div><span class="text-[#888888]">Доставка:</span> <span class="text-white">${escapeHtml(order.customer.delivery)}</span></div>
+        </div>
+        <div class="space-y-1 py-1">${itemsHtml}</div>
+        <div class="pt-2 border-t border-[#1c1c1c] flex justify-between font-bold text-white">
+          <span>Итого:</span>
+          <span>${formatPrice(order.total_uah)}</span>
+        </div>
+      `;
+
+      document.getElementById('confirmation-modal').classList.remove('hidden');
+    }
+
+    function closeConfirmation() {
+      document.getElementById('confirmation-modal').classList.add('hidden');
+      // Если открыто в Telegram, можно закрыть Mini App при желании:
+      // if (tg) tg.close();
+    }
+
+    // 11. Вспомогательные функции
+    function formatPrice(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' грн';
+    }
+
+    function getNoun(number, one, two, five) {
+      let n = Math.abs(number);
+      n %= 100;
+      if (n >= 5 && n <= 20) return five;
+      n %= 10;
+      if (n === 1) return one;
+      if (n >= 2 && n <= 4) return two;
+      return five;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[m]));
+    }
+
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 2000);
+    }
+
+    function triggerHaptic(type, style = 'light') {
+      if (!tg?.HapticFeedback) return;
+      try {
+        if (type === 'impact') tg.HapticFeedback.impactOccurred(style);
+        if (type === 'notification') tg.HapticFeedback.notificationOccurred(style);
+        if (type === 'selection') tg.HapticFeedback.selectionChanged();
+      } catch (e) {}
+    }
+
+    // Запуск приложения
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
