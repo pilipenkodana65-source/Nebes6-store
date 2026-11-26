@@ -4,11 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NEBES 6 — Store</title>
-  <!-- Подключение Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Подключение Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Шрифт Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -34,7 +31,6 @@
   </script>
 
   <style>
-    /* Базовые настройки для мобильного WebApp */
     * {
       -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
@@ -49,7 +45,6 @@
       padding: 0;
     }
 
-    /* Скрытие скроллбара для горизонтальных вкладок */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -58,7 +53,6 @@
       scrollbar-width: none;
     }
 
-    /* Плавные анимации модальных окон */
     @keyframes slideUp {
       from {
         transform: translateY(100%);
@@ -90,7 +84,6 @@
 </head>
 <body class="bg-[#0a0a0a] text-white min-h-screen flex flex-col selection:bg-white selection:text-black">
 
-  <!-- Уведомление (Toast) вместо alert() -->
   <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
     <div class="bg-white text-black text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl border border-neutral-300 flex items-center gap-2">
       <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
@@ -98,14 +91,12 @@
     </div>
   </div>
 
-  <!-- Шапка приложения (Header) -->
   <header class="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#262626] px-4 py-3.5 flex items-center justify-between">
     <div class="flex items-center gap-2.5">
       <div class="w-2 h-2 bg-white"></div>
       <h1 class="text-base font-bold tracking-[0.22em] uppercase">NEBES 6</h1>
     </div>
 
-    <!-- Кнопка корзины -->
     <button
       onclick="openCart()"
       aria-label="Открыть корзину"
@@ -121,41 +112,29 @@
     </button>
   </header>
 
-  <!-- Панель фильтрации по категориям -->
   <nav class="sticky top-[57px] z-20 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#1c1c1c] px-4 py-3">
-    <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar">
-      <!-- Вкладки рендерятся через JS -->
-    </div>
+    <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
   </nav>
 
-  <!-- Основной контент: Сетка товаров -->
   <main class="flex-1 px-4 py-5 max-w-2xl mx-auto w-full">
     <div class="flex items-center justify-between mb-4">
       <p id="collection-subtitle" class="text-xs uppercase tracking-[0.15em] text-[#888888]">DROP 01 // MONOCHROME</p>
       <span id="items-count" class="text-xs text-[#888888]">6 позиций</span>
     </div>
 
-    <div id="product-grid" class="grid grid-cols-2 gap-3 sm:gap-4">
-      <!-- Карточки товаров рендерятся через JS -->
-    </div>
+    <div id="product-grid" class="grid grid-cols-2 gap-3 sm:gap-4"></div>
   </main>
 
-  <!-- Футер -->
   <footer class="border-t border-[#1c1c1c] py-6 px-4 text-center mt-8">
     <p class="text-[11px] tracking-[0.2em] uppercase text-[#888888]">NEBES 6 STUDIO &copy; 2026</p>
     <p class="text-[10px] text-[#555555] mt-1">Доставка по Украине • Новая Почта</p>
   </footer>
 
-  <!-- ========================================== -->
-  <!-- МОДАЛЬНОЕ ОКНО: ДЕТАЛИ ТОВАРА (DRAWER)     -->
-  <!-- ========================================== -->
+  <!-- Модальное окно товара -->
   <div id="product-modal" class="fixed inset-0 z-40 hidden">
-    <!-- Затемнение фона -->
     <div onclick="closeProductModal()" class="absolute inset-0 bg-black/80 backdrop-blur-xs animate-fade-in"></div>
 
-    <!-- Контент карточки -->
     <div class="absolute bottom-0 left-0 right-0 max-w-lg mx-auto bg-[#141414] border-t border-x border-[#262626] rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto animate-slide-up">
-      <!-- Индикатор свайпа и кнопка закрытия -->
       <div class="flex items-center justify-between mb-4">
         <span class="text-[10px] uppercase tracking-[0.2em] text-[#888888]" id="modal-category">КАТЕГОРИЯ</span>
         <button onclick="closeProductModal()" class="p-2 -mr-2 text-[#888888] hover:text-white transition-colors" aria-label="Закрыть">
@@ -165,34 +144,23 @@
         </button>
       </div>
 
-      <!-- Превью изображения / SVG -->
-      <div id="modal-image-container" class="w-full aspect-[4/3] bg-[#0a0a0a] border border-[#262626] rounded-xl overflow-hidden mb-4 flex items-center justify-center relative">
-        <!-- SVG иллюстрация товара -->
-      </div>
+      <div id="modal-image-container" class="w-full aspect-[4/3] bg-[#0a0a0a] border border-[#262626] rounded-xl overflow-hidden mb-4 flex items-center justify-center relative"></div>
 
-      <!-- Название и цена -->
       <div class="flex items-start justify-between gap-3 mb-2">
         <h2 id="modal-title" class="text-lg font-semibold tracking-tight text-white">Название товара</h2>
         <span id="modal-price" class="text-lg font-bold text-white whitespace-nowrap">0 грн</span>
       </div>
 
-      <!-- Описание -->
-      <p id="modal-description" class="text-xs leading-relaxed text-[#888888] mb-5">
-        Описание товара...
-      </p>
+      <p id="modal-description" class="text-xs leading-relaxed text-[#888888] mb-5">Описание товара...</p>
 
-      <!-- Выбор размера -->
       <div class="mb-6">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-xs uppercase tracking-wider text-white font-medium">Выберите размер</span>
           <span class="text-[11px] text-[#888888]">Oversize fit</span>
         </div>
-        <div id="size-selector" class="grid grid-cols-4 gap-2">
-          <!-- Кнопки размеров S, M, L, XL -->
-        </div>
+        <div id="size-selector" class="grid grid-cols-4 gap-2"></div>
       </div>
 
-      <!-- Кнопка добавления в корзину -->
       <button
         id="modal-add-btn"
         onclick="addToCartFromModal()"
@@ -205,14 +173,11 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- МОДАЛЬНОЕ ОКНО: КОРЗИНА И ОФОРМЛЕНИЕ       -->
-  <!-- ========================================== -->
+  <!-- Модальное окно корзины -->
   <div id="cart-modal" class="fixed inset-0 z-40 hidden">
     <div onclick="closeCart()" class="absolute inset-0 bg-black/80 backdrop-blur-xs animate-fade-in"></div>
 
     <div class="absolute bottom-0 left-0 right-0 max-w-lg mx-auto bg-[#141414] border-t border-x border-[#262626] rounded-t-2xl flex flex-col max-h-[92vh] animate-slide-up">
-      <!-- Шапка корзины -->
       <div class="px-5 py-4 border-b border-[#262626] flex items-center justify-between shrink-0">
         <div>
           <h2 class="text-sm font-bold uppercase tracking-[0.18em]">Ваш заказ</h2>
@@ -225,14 +190,9 @@
         </button>
       </div>
 
-      <!-- Тело корзины (скроллируемое) -->
       <div id="cart-body" class="p-5 overflow-y-auto flex-1 space-y-6">
-        <!-- Список товаров в корзине -->
-        <div id="cart-items-list" class="space-y-3">
-          <!-- Элементы корзины рендерятся через JS -->
-        </div>
+        <div id="cart-items-list" class="space-y-3"></div>
 
-        <!-- Форма оформления заказа (скрывается, если корзина пуста) -->
         <form id="checkout-form" onsubmit="submitOrder(event)" class="space-y-4 pt-4 border-t border-[#262626]">
           <h3 class="text-xs font-semibold uppercase tracking-[0.15em] text-white">Данные для доставки</h3>
 
@@ -269,7 +229,6 @@
             />
           </div>
 
-          <!-- Итоговая сумма -->
           <div class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-4 space-y-2">
             <div class="flex justify-between text-xs text-[#888888]">
               <span>Доставка (Новая Почта)</span>
@@ -292,9 +251,7 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- МОДАЛЬНОЕ ОКНО: ПОДТВЕРЖДЕНИЕ ЗАКАЗА       -->
-  <!-- ========================================== -->
+  <!-- Окно подтверждения -->
   <div id="confirmation-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/90 backdrop-blur-sm animate-fade-in"></div>
     <div class="relative bg-[#141414] border border-[#262626] rounded-2xl p-6 max-w-sm w-full text-center animate-slide-up">
@@ -306,9 +263,7 @@
       <h3 class="text-base font-bold uppercase tracking-[0.15em] mb-1">Заказ принят</h3>
       <p class="text-xs text-[#888888] mb-4">Менеджер NEBES 6 свяжется с вами в ближайшее время для подтверждения.</p>
 
-      <div id="order-summary-box" class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-3.5 text-left text-xs space-y-2 mb-5">
-        <!-- Детали оформленного заказа -->
-      </div>
+      <div id="order-summary-box" class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-3.5 text-left text-xs space-y-2 mb-5"></div>
 
       <button
         onclick="closeConfirmation()"
@@ -319,25 +274,17 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- ЛОГИКА ПРИЛОЖЕНИЯ (JAVASCRIPT)             -->
-  <!-- ========================================== -->
   <script>
-    // 1. Инициализация Telegram WebApp SDK
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
       tg.expand();
-      // Настройка цветов хедера и фона в Telegram
       try {
         tg.setHeaderColor('#0a0a0a');
         tg.setBackgroundColor('#0a0a0a');
-      } catch (e) {
-        console.warn('Telegram theme color methods not supported in this version');
-      }
+      } catch (e) {}
     }
 
-    // 2. Генератор стильных монохромных векторных иллюстраций одежды
     function getProductArtwork(type, code) {
       const commonBg = `
         <svg viewBox="0 0 240 260" class="w-full h-full object-cover" xmlns="http://www.w3.org/2000/svg">
@@ -363,7 +310,6 @@
 
       const silhouettes = {
         jacket: `
-          <!-- Техническая куртка / Пуховик -->
           <path d="M85 52 L105 46 L135 46 L155 52 L188 78 L175 168 L156 165 L156 205 L84 205 L84 165 L65 168 L52 78 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
           <path d="M105 46 L120 64 L135 46" fill="none" stroke="#ffffff" stroke-width="1.4"/>
           <line x1="120" y1="64" x2="120" y2="205" stroke="#ffffff" stroke-width="1.2"/>
@@ -374,7 +320,6 @@
           <rect x="130" y="148" width="16" height="20" fill="none" stroke="#777777" stroke-width="1"/>
         `,
         hoodie: `
-          <!-- Оверсайз худи -->
           <path d="M92 58 C92 42, 148 42, 148 58 L184 80 L172 172 L152 169 L152 204 L88 204 L88 169 L68 172 L56 80 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
           <path d="M96 58 Q120 78 144 58" fill="none" stroke="#ffffff" stroke-width="1.3"/>
           <line x1="113" y1="68" x2="113" y2="92" stroke="#888888" stroke-width="1.2"/>
@@ -383,7 +328,6 @@
           <text x="120" y="122" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="10" letter-spacing="3">NEBES 6</text>
         `,
         pants: `
-          <!-- Широкие карго брюки -->
           <path d="M84 52 L156 52 L166 208 L130 208 L120 112 L110 208 L74 208 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
           <line x1="84" y1="66" x2="156" y2="66" stroke="#555555" stroke-width="1"/>
           <line x1="120" y1="52" x2="120" y2="92" stroke="#555555" stroke-width="1"/>
@@ -393,7 +337,6 @@
           <line x1="130" y1="196" x2="164" y2="196" stroke="#555555" stroke-width="1"/>
         `,
         bag: `
-          <!-- Кросс-боди сумка -->
           <path d="M72 95 Q120 35 168 95" fill="none" stroke="#888888" stroke-width="2" stroke-dasharray="4 2"/>
           <rect x="68" y="95" width="104" height="88" rx="6" fill="#141414" stroke="#ffffff" stroke-width="1.5"/>
           <line x1="68" y1="125" x2="172" y2="125" stroke="#ffffff" stroke-width="1.2"/>
@@ -401,7 +344,6 @@
           <text x="120" y="158" text-anchor="middle" fill="#888888" font-family="monospace" font-size="9" letter-spacing="2">N6-UNIT</text>
         `,
         trench: `
-          <!-- Минималистичное пальто / тренч -->
           <path d="M90 48 L150 48 L182 76 L170 176 L154 174 L158 214 L82 214 L86 174 L70 176 L58 76 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
           <path d="M95 48 L120 88 L145 48" fill="none" stroke="#ffffff" stroke-width="1.3"/>
           <line x1="120" y1="88" x2="120" y2="214" stroke="#666666" stroke-width="1.1"/>
@@ -411,7 +353,6 @@
           <circle cx="128" cy="134" r="2" fill="#ffffff"/>
         `,
         cap: `
-          <!-- Кепка / Балаклава -->
           <path d="M72 135 C72 88, 168 88, 168 135 Z" fill="#141414" stroke="#ffffff" stroke-width="1.5"/>
           <path d="M62 135 Q120 152 178 135 L168 144 Q120 160 72 144 Z" fill="#1c1c1c" stroke="#ffffff" stroke-width="1.3"/>
           <line x1="120" y1="99" x2="120" y2="135" stroke="#444444" stroke-width="1"/>
@@ -422,7 +363,6 @@
       return commonBg + (silhouettes[type] || silhouettes.hoodie) + commonFooter;
     }
 
-    // 3. Каталог товаров бренда NEBES 6
     const products = [
       {
         id: 1,
@@ -483,25 +423,21 @@
     const categories = ['Все', 'Верхняя одежда', 'Худи', 'Брюки', 'Аксессуары'];
     const sizes = ['S', 'M', 'L', 'XL'];
 
-    // 4. Состояние приложения
     let activeCategory = 'Все';
     let selectedProduct = null;
     let selectedSize = 'L';
-    let cart = []; // [{ productId, name, price, size, qty, artwork, code }]
+    let cart = [];
 
-    // Попытка загрузить корзину из localStorage
     try {
       const savedCart = localStorage.getItem('nebes6_cart');
       if (savedCart) cart = JSON.parse(savedCart);
     } catch (e) {}
 
-    // 5. Инициализация интерфейса при загрузке
     function initApp() {
       renderCategories();
       renderProducts();
       updateCartBadge();
 
-      // Автозаполнение имени из данных пользователя Telegram, если доступно
       if (tg?.initDataUnsafe?.user) {
         const user = tg.initDataUnsafe.user;
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
@@ -514,7 +450,6 @@
       }
     }
 
-    // 6. Рендер вкладок категорий
     function renderCategories() {
       const container = document.getElementById('category-tabs');
       container.innerHTML = categories
@@ -543,7 +478,6 @@
       renderProducts();
     }
 
-    // 7. Рендер сетки товаров
     function renderProducts() {
       const grid = document.getElementById('product-grid');
       const filtered =
@@ -565,7 +499,6 @@
             onclick="openProductModal(${product.id})"
             class="group bg-[#141414] border border-[#262626] hover:border-[#555555] rounded-xl overflow-hidden flex flex-col cursor-pointer transition-all active:scale-[0.98]"
           >
-            <!-- Изображение товара -->
             <div class="aspect-[4/4.3] bg-[#0a0a0a] relative overflow-hidden border-b border-[#1f1f1f]">
               ${getProductArtwork(product.artwork, product.code)}
               <button
@@ -579,7 +512,6 @@
               </button>
             </div>
 
-            <!-- Информация о товаре -->
             <div class="p-3 flex-1 flex flex-col justify-between">
               <div>
                 <span class="text-[10px] uppercase tracking-wider text-[#888888] block mb-1">${product.category}</span>
@@ -596,12 +528,11 @@
         .join('');
     }
 
-    // 8. Модальное окно деталей товара
     function openProductModal(productId) {
       selectedProduct = products.find((p) => p.id === productId);
       if (!selectedProduct) return;
 
-      selectedSize = 'L'; // Размер по умолчанию
+      selectedSize = 'L';
       triggerHaptic('impact', 'light');
 
       document.getElementById('modal-category').textContent = selectedProduct.category;
@@ -652,7 +583,6 @@
       renderSizeSelector();
     }
 
-    // 9. Управление корзиной
     function quickAdd(productId) {
       const product = products.find((p) => p.id === productId);
       if (!product) return;
@@ -759,10 +689,11 @@
             <p class="text-sm font-medium text-white mb-1">Корзина пуста</p>
             <p class="text-xs text-[#888888] mb-5">Добавьте вещи из каталога NEBES 6</p>
             <button
+              type="button"
               onclick="closeCart()"
-              class="bg-white text-black text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-lg"
+              class="bg-white text-black hover:bg-neutral-200 font-semibold text-xs uppercase tracking-[0.15em] px-5 py-3 rounded-xl transition-all"
             >
-              Перейти в каталог
+              В каталог
             </button>
           </div>
         `;
@@ -774,51 +705,35 @@
         .map(
           (item, index) => `
           <div class="bg-[#0a0a0a] border border-[#262626] rounded-xl p-3 flex items-center gap-3">
-            <!-- Миниатюра -->
-            <div class="w-16 h-16 rounded-lg overflow-hidden border border-[#1f1f1f] shrink-0">
+            <div class="w-16 h-20 rounded-lg overflow-hidden border border-[#1f1f1f] shrink-0 bg-[#141414]">
               ${getProductArtwork(item.artwork, item.code)}
             </div>
-
-            <!-- Описание позиции -->
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
-                <h4 class="text-xs font-medium text-white truncate">${item.name}</h4>
+                <h4 class="text-xs font-semibold text-white truncate">${item.name}</h4>
                 <button
                   type="button"
                   onclick="removeItemFromCart(${index})"
-                  aria-label="Удалить"
-                  class="text-[#666666] hover:text-white transition-colors p-0.5"
+                  class="text-[11px] text-[#888888] hover:text-white transition-colors"
                 >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  Удалить
                 </button>
               </div>
-
-              <span class="inline-block text-[10px] uppercase tracking-wider text-[#888888] bg-[#141414] border border-[#262626] px-1.5 py-0.5 rounded mt-1">
-                Размер: ${item.size}
-              </span>
-
-              <div class="flex items-center justify-between mt-2">
+              <p class="text-[11px] text-[#888888] mt-0.5">Размер: <span class="text-white font-medium">${item.size}</span></p>
+              <div class="flex items-center justify-between mt-2.5">
                 <span class="text-xs font-bold text-white">${formatPrice(item.price * item.qty)}</span>
-
-                <!-- Контрол количества -->
-                <div class="flex items-center bg-[#141414] border border-[#262626] rounded-lg">
+                <div class="flex items-center gap-2 bg-[#141414] border border-[#262626] rounded-lg px-2 py-1">
                   <button
                     type="button"
                     onclick="updateItemQty(${index}, -1)"
-                    class="w-7 h-6 flex items-center justify-center text-xs text-[#888888] hover:text-white"
-                  >
-                    −
-                  </button>
-                  <span class="text-xs font-medium px-2 text-white">${item.qty}</span>
+                    class="w-5 h-5 flex items-center justify-center text-xs text-white hover:bg-[#222222] rounded"
+                  >−</button>
+                  <span class="text-xs font-semibold min-w-[14px] text-center">${item.qty}</span>
                   <button
                     type="button"
                     onclick="updateItemQty(${index}, 1)"
-                    class="w-7 h-6 flex items-center justify-center text-xs text-[#888888] hover:text-white"
-                  >
-                    +
-                  </button>
+                    class="w-5 h-5 flex items-center justify-center text-xs text-white hover:bg-[#222222] rounded"
+                  >+</button>
                 </div>
               </div>
             </div>
@@ -828,115 +743,84 @@
         .join('');
     }
 
-    // 10. Оформление заказа и отправка данных в Telegram Bot
     function submitOrder(event) {
       event.preventDefault();
       if (cart.length === 0) return;
 
-      const name = document.getElementById('order-name').value.trim();
-      const contact = document.getElementById('order-contact').value.trim();
-      const delivery = document.getElementById('order-delivery').value.trim();
+      const customerName = document.getElementById('order-name').value.trim();
+      const customerContact = document.getElementById('order-contact').value.trim();
+      const deliveryAddress = document.getElementById('order-delivery').value.trim();
       const totalSum = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-      const orderPayload = {
+      const orderData = {
         brand: 'NEBES 6',
-        customer: { name, contact, delivery },
-        items: cart.map((i) => ({
-          id: i.productId,
-          name: i.name,
-          size: i.size,
-          qty: i.qty,
-          price: i.price
+        created_at: new Date().toISOString(),
+        customer: {
+          name: customerName,
+          contact: customerContact,
+          delivery: deliveryAddress,
+          tg_user: tg?.initDataUnsafe?.user || null
+        },
+        items: cart.map((item) => ({
+          id: item.productId,
+          code: item.code,
+          name: item.name,
+          size: item.size,
+          qty: item.qty,
+          price: item.price,
+          subtotal: item.price * item.qty
         })),
-        total_uah: totalSum,
-        timestamp: new Date().toISOString()
+        total: totalSum,
+        currency: 'UAH'
       };
 
       triggerHaptic('notification', 'success');
 
-      // Если приложение запущено внутри Telegram как Keyboard WebApp — отправляем данные боту
-      if (tg && tg.initData) {
-        try {
-          tg.sendData(JSON.stringify(orderPayload));
-        } catch (err) {
-          console.warn('tg.sendData available only for keyboard-launched web apps:', err);
-        }
-      }
-
-      // Показываем экран подтверждения заказа
-      showOrderConfirmation(orderPayload);
-
-      // Очищаем корзину
-      cart = [];
-      saveCart();
-      updateCartBadge();
-      closeCart();
-    }
-
-    function showOrderConfirmation(order) {
       const summaryBox = document.getElementById('order-summary-box');
-      const itemsHtml = order.items
+      const itemsHtml = orderData.items
         .map(
-          (i) => `
-          <div class="flex justify-between text-[#cccccc]">
-            <span>${i.name} (${i.size}) × ${i.qty}</span>
-            <span class="font-medium">${formatPrice(i.price * i.qty)}</span>
-          </div>
-        `
+          (i) =>
+            `<div class="flex justify-between text-[#cccccc]">
+              <span>${i.name} (${i.size}) × ${i.qty}</span>
+              <span class="font-medium text-white">${formatPrice(i.subtotal)}</span>
+            </div>`
         )
         .join('');
 
       summaryBox.innerHTML = `
-        <div class="pb-2 border-b border-[#1c1c1c] space-y-1">
-          <div><span class="text-[#888888]">Получатель:</span> <span class="text-white">${escapeHtml(order.customer.name)}</span></div>
-          <div><span class="text-[#888888]">Контакт:</span> <span class="text-white">${escapeHtml(order.customer.contact)}</span></div>
-          <div><span class="text-[#888888]">Доставка:</span> <span class="text-white">${escapeHtml(order.customer.delivery)}</span></div>
-        </div>
-        <div class="space-y-1 py-1">${itemsHtml}</div>
-        <div class="pt-2 border-t border-[#1c1c1c] flex justify-between font-bold text-white">
-          <span>Итого:</span>
-          <span>${formatPrice(order.total_uah)}</span>
+        <div><span class="text-[#888888]">Клиент:</span> <span class="text-white">${escapeHtml(customerName)}</span></div>
+        <div><span class="text-[#888888]">Контакт:</span> <span class="text-white">${escapeHtml(customerContact)}</span></div>
+        <div><span class="text-[#888888]">Доставка:</span> <span class="text-white">${escapeHtml(deliveryAddress)}</span></div>
+        <div class="pt-2 border-t border-[#1f1f1f] space-y-1">${itemsHtml}</div>
+        <div class="pt-2 border-t border-[#1f1f1f] flex justify-between font-bold text-white">
+          <span>Сумма:</span>
+          <span>${formatPrice(totalSum)}</span>
         </div>
       `;
 
+      if (tg && typeof tg.sendData === 'function') {
+        tg.sendData(JSON.stringify(orderData));
+      } else {
+        console.log('ORDER PAYLOAD:', orderData);
+      }
+
+      cart = [];
+      saveCart();
+      updateCartBadge();
+      closeCart();
       document.getElementById('confirmation-modal').classList.remove('hidden');
     }
 
     function closeConfirmation() {
       document.getElementById('confirmation-modal').classList.add('hidden');
-      // Если открыто в Telegram, можно закрыть Mini App при желании:
-      // if (tg) tg.close();
+      renderProducts();
     }
 
-    // 11. Вспомогательные функции
-    function formatPrice(num) {
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' грн';
-    }
-
-    function getNoun(number, one, two, five) {
-      let n = Math.abs(number);
-      n %= 100;
-      if (n >= 5 && n <= 20) return five;
-      n %= 10;
-      if (n === 1) return one;
-      if (n >= 2 && n <= 4) return two;
-      return five;
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, (m) => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      }[m]));
-    }
-
-    let toastTimeout;
+    let toastTimeout = null;
     function showToast(message) {
       const toast = document.getElementById('toast');
-      document.getElementById('toast-message').textContent = message;
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = message;
       toast.classList.remove('opacity-0', '-translate-y-2');
       toast.classList.add('opacity-100', 'translate-y-0');
 
@@ -944,20 +828,40 @@
       toastTimeout = setTimeout(() => {
         toast.classList.remove('opacity-100', 'translate-y-0');
         toast.classList.add('opacity-0', '-translate-y-2');
-      }, 2000);
+      }, 2200);
     }
 
-    function triggerHaptic(type, style = 'light') {
-      if (!tg?.HapticFeedback) return;
+    function triggerHaptic(type, styleOrType) {
       try {
-        if (type === 'impact') tg.HapticFeedback.impactOccurred(style);
-        if (type === 'notification') tg.HapticFeedback.notificationOccurred(style);
+        if (!tg?.HapticFeedback) return;
+        if (type === 'impact') tg.HapticFeedback.impactOccurred(styleOrType || 'light');
+        if (type === 'notification') tg.HapticFeedback.notificationOccurred(styleOrType || 'success');
         if (type === 'selection') tg.HapticFeedback.selectionChanged();
       } catch (e) {}
     }
 
-    // Запуск приложения
-    window.addEventListener('DOMContentLoaded', initApp);
+    function formatPrice(amount) {
+      return `${Number(amount || 0).toLocaleString('ru-RU')} грн`;
+    }
+
+    function getNoun(number, one, two, five) {
+      let n = Math.abs(number) % 100;
+      if (n >= 5 && n <= 20) return five;
+      n = n % 10;
+      if (n === 1) return one;
+      if (n >= 2 && n <= 4) return two;
+      return five;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    initApp();
   </script>
 </body>
 </html>
