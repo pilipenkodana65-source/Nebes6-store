@@ -1,1075 +1,2316 @@
 <!DOCTYPE html>
-<html lang="uk" class="dark">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Магазин одягу NEBES6</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Шрифт Inter для сучасної типографіки -->
+    <title>NEBES6 — Інтернет-магазин одягу</title>
+    <!-- Підключення шрифтів Inter та Cormorant Garamond -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        metalBg: '#08080a',
-                        metalCard: '#121216',
-                        metalElevated: '#1b1b21',
-                        metalBorder: '#2e2e38',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* Приховування скролбару для горизонтального меню категорій */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Анімації модальних вікон та крапель рідкого металу */
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up {
-            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
-        @keyframes liquidBlob {
-            0%, 100% {
-                border-radius: 45% 55% 63% 37% / 41% 49% 51% 59%;
-                transform: translate3d(0, 0, 0) scale(1);
-            }
-            33% {
-                border-radius: 62% 38% 42% 58% / 56% 35% 65% 44%;
-                transform: translate3d(12px, -14px, 0) scale(1.06);
-            }
-            66% {
-                border-radius: 37% 63% 55% 45% / 48% 62% 38% 52%;
-                transform: translate3d(-12px, 10px, 0) scale(0.95);
-            }
+        /* =====================================================================
+           1. ПАЛІТРА ТА ПОВЕРХНІ МАТОВОЇ РТУТІ Й РІДКОГО СРІБЛА
+           ===================================================================== */
+        :root {
+            --bg-mercury-base: #0c0e12;
+            --bg-surface: #14171d;
+            --bg-elevated: #1b1f27;
+            --bg-input: #111419;
+            --bg-card-media: linear-gradient(155deg, #232833 0%, #12151b 55%, #1d212b 100%);
+            --border-subtle: rgba(203, 213, 225, 0.14);
+            --border-liquid: rgba(248, 250, 252, 0.48);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #8892a4;
+            --liquid-silver-grad: linear-gradient(135deg, #ffffff 0%, #dce3ec 42%, #9aa5b6 100%);
+            --liquid-silver-pill: linear-gradient(145deg, #ffffff 0%, #cbd5e1 65%, #94a3b8 100%);
+            --ink-on-silver: #0c0e12;
+            --success: #4ade80;
+            --danger: #f87171;
+            --radius-sm: 9px;
+            --radius-md: 13px;
+            --radius-lg: 18px;
+            --max-width: 980px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-serif: 'Cormorant Garamond', Georgia, serif;
         }
 
-        /* Дзеркальний темний фон рідкого металу та хрому */
-        body {
-            background-color: var(--tg-bg-color, #08080a);
-            background-image:
-                radial-gradient(circle at 84% 12%, rgba(248, 250, 252, 0.14), transparent 42%),
-                radial-gradient(circle at 15% 82%, rgba(148, 163, 184, 0.12), transparent 46%),
-                linear-gradient(180deg, #08080a 0%, #101015 55%, #060608 100%);
-            color: var(--tg-text-color, #ffffff);
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-        }
-
-        /* Плаваючі краплі рідкого металу на фоні */
-        .liquid-droplet {
+        /* Декоративний шар з органічними ртутними краплями та вихорами */
+        .mercury-backdrop {
             position: fixed;
-            pointer-events: none;
+            inset: 0;
             z-index: 0;
-            background: radial-gradient(circle at 30% 26%,
-                #ffffff 0%,
-                #e2e8f0 22%,
-                #64748b 54%,
-                #18181b 82%,
-                #08080a 100%
-            );
-            box-shadow:
-                inset -8px -10px 18px rgba(0, 0, 0, 0.88),
-                inset 6px 6px 14px rgba(255, 255, 255, 0.72),
-                0 14px 30px rgba(0, 0, 0, 0.78);
-            opacity: 0.22;
-            animation: liquidBlob 11s ease-in-out infinite;
-        }
-
-        /* Інтерактивний хромовий відблиск за курсором або дотиком */
-        #chrome-sheen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 260px;
-            height: 260px;
-            margin-left: -130px;
-            margin-top: -130px;
-            border-radius: 9999px;
             pointer-events: none;
-            z-index: 15;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            background: radial-gradient(circle,
-                rgba(255, 255, 255, 0.24) 0%,
-                rgba(226, 232, 240, 0.10) 38%,
-                rgba(100, 116, 139, 0.03) 62%,
-                transparent 75%
-            );
-            mix-blend-mode: screen;
-            will-change: transform;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 14% 16%, rgba(226, 232, 240, 0.07) 0%, transparent 38%),
+                radial-gradient(circle at 86% 24%, rgba(148, 163, 184, 0.08) 0%, transparent 42%),
+                radial-gradient(circle at 50% 88%, rgba(248, 250, 252, 0.05) 0%, transparent 46%);
         }
 
-        /* Металевий градієнт тексту */
-        .chrome-text {
-            background: linear-gradient(
-                120deg,
-                #ffffff 0%,
-                #cbd5e1 28%,
-                #64748b 50%,
-                #f8fafc 74%,
-                #94a3b8 100%
-            );
+        .mercury-blobs-svg {
+            position: absolute;
+            inset: -5%;
+            width: 110%;
+            height: 110%;
+            opacity: 0.62;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Гарантоване приховування закритих модальних вікон і панелей */
+        [hidden] {
+            display: none !important;
+            pointer-events: none !important;
+        }
+
+        html, body {
+            background-color: var(--bg-mercury-base);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input, select {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            background: none;
+            border: none;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .silver-heading {
+            background: var(--liquid-silver-grad);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        /* Хромована кнопка з дзеркальним переливом */
-        .chrome-btn {
-            background: linear-gradient(
-                135deg,
-                #ffffff 0%,
-                #cbd5e1 28%,
-                #64748b 54%,
-                #f1f5f9 78%,
-                #94a3b8 100%
-            );
-            color: #09090b;
-            box-shadow:
-                inset 0 1.5px 1px rgba(255, 255, 255, 0.9),
-                inset 0 -1.5px 2px rgba(15, 23, 42, 0.45),
-                0 8px 22px rgba(226, 232, 240, 0.16);
+        /* =====================================================================
+           2. ШАПКА ТА НАВІГАЦІЯ
+           ===================================================================== */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(12, 14, 18, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
         }
 
-        .chrome-btn:active {
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 58px;
+            padding: 8px 0;
+        }
+
+        .brand-logo {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            line-height: 1;
+            padding: 4px 2px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ghost-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 13px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+        }
+
+        .ghost-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-liquid);
+        }
+
+        .ghost-btn:active {
             transform: scale(0.98);
         }
 
-        /* Поверхня у стилі рідкого металу */
-        .metal-surface {
-            background: linear-gradient(
-                155deg,
-                rgba(30, 30, 38, 0.9) 0%,
-                rgba(15, 15, 20, 0.95) 58%,
-                rgba(9, 9, 12, 0.98) 100%
-            );
-            border: 1px solid rgba(226, 232, 240, 0.16);
-            box-shadow:
-                0 12px 28px rgba(0, 0, 0, 0.72),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
+        .cart-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--liquid-silver-pill);
+            color: var(--ink-on-silver);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            font-size: 12px;
+            font-weight: 700;
+            transition: filter 0.15s ease, transform 0.1s ease;
         }
 
-        .metal-surface-hover:hover {
-            border-color: rgba(248, 250, 252, 0.42);
-            box-shadow:
-                0 14px 32px rgba(0, 0, 0, 0.85),
-                0 0 22px rgba(226, 232, 240, 0.14),
-                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        .cart-trigger:hover {
+            filter: brightness(1.06);
+        }
+
+        .cart-trigger:active {
+            transform: scale(0.98);
+        }
+
+        .cart-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: var(--ink-on-silver);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 2px 0 10px;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        .nav-tab.is-active {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-color: var(--border-liquid);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        .silver-orb {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #94a3b8 80%);
+            box-shadow: 0 0 8px rgba(226, 232, 240, 0.5);
+            flex-shrink: 0;
+        }
+
+        /* =====================================================================
+           3. ОСНОВНИЙ КОНТЕНТ ТА КАТАЛОГ
+           ===================================================================== */
+        .page-main {
+            position: relative;
+            z-index: 1;
+            padding-top: 22px;
+            padding-bottom: 52px;
+        }
+
+        .view-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .catalog-top {
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .catalog-title {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .features-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .feature-box {
+            background: rgba(20, 23, 29, 0.86);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 13px 14px;
+            transition: border-color 0.15s ease;
+        }
+
+        .feature-box:hover {
+            border-color: var(--border-liquid);
+        }
+
+        .feature-box-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .feature-box-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .search-sort-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1 1 240px;
+        }
+
+        .search-svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-field {
+            width: 100%;
+            padding: 10px 36px 10px 36px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .search-field:focus {
+            border-color: var(--border-liquid);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            border-radius: 6px;
+        }
+
+        .sort-field {
+            flex: 0 1 auto;
+            min-width: 185px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .sort-field:focus {
+            border-color: var(--border-liquid);
+        }
+
+        .category-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+
+        .category-pills::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-pill {
+            padding: 8px 15px;
+            border-radius: 999px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .cat-pill:hover {
+            border-color: var(--border-liquid);
+            color: var(--text-primary);
+        }
+
+        .cat-pill.is-active {
+            background: var(--liquid-silver-pill);
+            color: var(--ink-on-silver);
+            border-color: #ffffff;
+        }
+
+        .catalog-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .text-action-link {
+            color: var(--text-primary);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .text-action-link:hover {
+            color: #cbd5e1;
+        }
+
+        /* Сітка товарів */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 18px;
+        }
+
+        .item-card {
+            background: rgba(20, 23, 29, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .item-card:hover {
+            border-color: var(--border-liquid);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.6);
+        }
+
+        .item-media {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            background: var(--bg-card-media);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .item-media-btn {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-cat-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(12, 14, 18, 0.78);
+            border: 1px solid var(--border-liquid);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            pointer-events: none;
+        }
+
+        .item-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .item-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .item-name-btn {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .item-price {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .item-fit {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .sizes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .size-btn {
+            padding: 8px 4px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .size-btn:hover {
+            border-color: var(--border-liquid);
+            color: var(--text-primary);
+        }
+
+        .size-btn.is-selected {
+            background: var(--liquid-silver-pill);
+            color: var(--ink-on-silver);
+            border-color: #ffffff;
+            font-weight: 700;
+        }
+
+        .item-actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 4px;
+        }
+
+        .btn-silver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--liquid-silver-pill);
+            color: var(--ink-on-silver);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            font-weight: 700;
+            transition: filter 0.15s ease, transform 0.1s ease;
+        }
+
+        .btn-silver:hover {
+            filter: brightness(1.06);
+        }
+
+        .btn-silver:active {
+            transform: scale(0.98);
+        }
+
+        .btn-dark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-dark:hover {
+            background: #252b36;
+            border-color: var(--border-liquid);
+        }
+
+        /* Картки інформації та зв'язку з менеджером */
+        .surface-card {
+            background: rgba(20, 23, 29, 0.88);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .surface-card h2 {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .surface-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .surface-card p, .bullet-list {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .two-cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        .catalog-manager-banner {
+            background: linear-gradient(135deg, rgba(226, 232, 240, 0.12) 0%, rgba(20, 23, 29, 0.94) 68%);
+            border: 1px solid var(--border-liquid);
+            border-radius: var(--radius-lg);
+            padding: 22px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .catalog-manager-copy {
+            max-width: 540px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .catalog-manager-copy h3 {
+            font-family: var(--font-serif);
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .catalog-manager-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .topics-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+        }
+
+        .topic-card-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: left;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .topic-card-btn:hover {
+            border-color: var(--border-liquid);
+            background: var(--bg-elevated);
+        }
+
+        .meta-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 12px;
+        }
+
+        .site-footer {
+            margin-top: 38px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* =====================================================================
+           4. МОДАЛЬНІ ВІКНА ТА КОШИК
+           ===================================================================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(6, 8, 11, 0.78);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+        }
+
+        @media (min-width: 640px) {
+            .modal-overlay {
+                align-items: center;
+                padding: 16px;
+            }
+        }
+
+        .modal-dialog {
+            width: 100%;
+            max-width: 520px;
+            max-height: 92vh;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-liquid);
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75);
+        }
+
+        @media (min-width: 640px) {
+            .modal-dialog {
+                border-radius: 18px;
+            }
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: var(--bg-elevated);
+        }
+
+        .modal-heading {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .modal-close {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+            border-color: var(--border-liquid);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-mercury-base);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .size-chart-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .size-chart-table th, .size-chart-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .size-chart-table th {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+            font-weight: 700;
+        }
+
+        .cart-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .cart-row-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .cart-row-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cart-row-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .stepper {
+            display: inline-flex;
+            align-items: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+        }
+
+        .stepper-btn {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stepper-num {
+            min-width: 24px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .remove-row-btn {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .remove-row-btn:hover {
+            color: var(--danger);
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .field-input:focus {
+            border-color: var(--border-liquid);
+            background: var(--bg-elevated);
+        }
+
+        .promo-box {
+            display: flex;
+            gap: 8px;
+        }
+
+        .total-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .total-final {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .toast-notice {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            z-index: 80;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: var(--liquid-silver-pill);
+            color: var(--ink-on-silver);
+            border: 1px solid #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .toast-notice.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 520px) {
+            .features-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body class="bg-metalBg text-white font-sans antialiased selection:bg-slate-200 selection:text-black pb-24">
-    <!-- Декоративні краплі рідкого металу та курсорний/дотиковий відблиск -->
-    <div class="liquid-droplet w-44 h-44 -top-12 -left-10" style="animation-delay: 0s;"></div>
-    <div class="liquid-droplet w-32 h-32 top-52 -right-10" style="animation-delay: -3.5s;"></div>
-    <div class="liquid-droplet w-36 h-36 bottom-24 left-6" style="animation-delay: -7s;"></div>
-    <div id="chrome-sheen" aria-hidden="true"></div>
+<body>
 
-    <!-- Шапка у стилі рідкого металу та хрому -->
-    <header class="sticky top-0 z-30 bg-metalBg/85 backdrop-blur-md border-b border-white/10 px-4 py-3 flex items-center justify-between shadow-[0_8px_24px_rgba(0,0,0,0.85)]">
-        <div class="flex items-center gap-3">
-            <!-- Хромована емблема NEBES6 з підтримкою IMG_4925.png та SVG-резервом -->
-            <div class="w-11 h-11 rounded-2xl bg-metalElevated border border-white/25 shadow-[0_4px_12px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.45)] flex items-center justify-center overflow-hidden shrink-0">
-                <img
-                    src="IMG_4925.png"
-                    alt="Емблема NEBES6"
-                    class="w-full h-full object-cover hidden"
-                    onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                    onerror="this.remove();"
-                >
-                <svg viewBox="0 0 64 64" class="w-9 h-9" aria-label="NEBES6 Хромована Емблема">
-                    <defs>
-                        <linearGradient id="headerChromeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffffff"/>
-                            <stop offset="30%" stop-color="#cbd5e1"/>
-                            <stop offset="56%" stop-color="#475569"/>
-                            <stop offset="82%" stop-color="#f8fafc"/>
-                            <stop offset="100%" stop-color="#94a3b8"/>
-                        </linearGradient>
-                    </defs>
-                    <circle cx="32" cy="32" r="28" fill="#101014" stroke="url(#headerChromeGrad)" stroke-width="2.2"/>
-                    <text x="32" y="28" text-anchor="middle" fill="url(#headerChromeGrad)" font-family="Inter, sans-serif" font-weight="900" font-size="11" letter-spacing="1.2">NEBES</text>
-                    <text x="32" y="49" text-anchor="middle" fill="url(#headerChromeGrad)" font-family="Inter, sans-serif" font-weight="900" font-size="20">6</text>
-                </svg>
+    <!-- Органічні ртутні краплі та розводи на фоні -->
+    <div class="mercury-backdrop" aria-hidden="true">
+        <svg class="mercury-blobs-svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="mercurySwirlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.20"/>
+                    <stop offset="50%" stop-color="#cbd5e1" stop-opacity="0.10"/>
+                    <stop offset="100%" stop-color="#64748b" stop-opacity="0.02"/>
+                </linearGradient>
+                <radialGradient id="mercuryDropRadial" cx="35%" cy="30%" r="65%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.34"/>
+                    <stop offset="55%" stop-color="#94a3b8" stop-opacity="0.14"/>
+                    <stop offset="100%" stop-color="#1e293b" stop-opacity="0.02"/>
+                </radialGradient>
+            </defs>
+            <path d="M-70 175 C190 65, 370 315, 625 185 C845 75, 1020 250, 1275 135 L1275 265 C1015 360, 815 185, 595 305 C355 435, 165 215, -70 305 Z" fill="url(#mercurySwirlGrad)"/>
+            <path d="M-60 660 C215 540, 445 760, 710 610 C920 495, 1080 650, 1270 570 L1270 675 C1060 755, 890 615, 690 725 C430 865, 190 665, -60 775 Z" fill="url(#mercurySwirlGrad)"/>
+            <circle cx="165" cy="125" r="34" fill="url(#mercuryDropRadial)"/>
+            <circle cx="220" cy="160" r="11" fill="url(#mercuryDropRadial)"/>
+            <circle cx="985" cy="185" r="44" fill="url(#mercuryDropRadial)"/>
+            <circle cx="928" cy="228" r="14" fill="url(#mercuryDropRadial)"/>
+            <circle cx="845" cy="735" r="28" fill="url(#mercuryDropRadial)"/>
+            <circle cx="305" cy="785" r="19" fill="url(#mercuryDropRadial)"/>
+            <path d="M80 430 Q340 350 560 450 T1120 410" fill="none" stroke="rgba(241, 245, 249, 0.08)" stroke-width="1.5"/>
+        </svg>
+    </div>
+
+    <!-- =====================================================================
+         ШАПКА ТА ВКЛАДКИ НАВІГАЦІЇ
+         ===================================================================== -->
+    <header class="site-header">
+        <div class="container">
+            <div class="header-row">
+                <button type="button" class="brand-logo silver-heading" data-action="switch-tab" data-tab="catalog">
+                    NEBES6
+                </button>
+
+                <div class="header-controls">
+                    <button type="button" class="ghost-btn" data-action="open-size-guide">
+                        <span>Таблиця розмірів</span>
+                    </button>
+
+                    <button type="button" class="cart-trigger" data-action="open-cart">
+                        <span>Кошик</span>
+                        <span id="cart-count" class="cart-badge">0</span>
+                    </button>
+                </div>
             </div>
-            <div>
-                <div class="text-xl font-black tracking-wider leading-none chrome-text">NEBES6</div>
-                <div class="text-[11px] font-medium tracking-[0.14em] text-slate-300/85 mt-0.5">Магазин одягу · Хром</div>
-            </div>
+
+            <nav class="nav-tabs" aria-label="Навігація магазину">
+                <button type="button" class="nav-tab is-active" data-action="switch-tab" data-tab="catalog">
+                    Каталог
+                </button>
+                <button type="button" class="nav-tab" data-action="switch-tab" data-tab="delivery">
+                    Доставка і оплата
+                </button>
+                <button type="button" class="nav-tab" data-action="switch-tab" data-tab="manager">
+                    <span class="silver-orb"></span>
+                    <span>Зв’язатися з менеджером</span>
+                </button>
+            </nav>
         </div>
-
-        <!-- Кнопка відкриття кошика -->
-        <button
-            onclick="openCart()"
-            class="relative p-2.5 metal-surface metal-surface-hover active:scale-95 transition rounded-xl flex items-center justify-center"
-            aria-label="Відкрити кошик"
-        >
-            <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-100"></i>
-            <span id="header-cart-badge" class="hidden absolute -top-1.5 -right-1.5 chrome-btn text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center">0</span>
-        </button>
     </header>
 
-    <!-- Hero-блок у стилі рідкого металу та дзеркального хрому -->
-    <section class="relative z-10 px-4 pt-4 pb-2">
-        <div class="metal-surface rounded-3xl p-5 relative overflow-hidden">
-            <!-- Металева крапля всередині картки -->
-            <div class="w-28 h-28 rounded-full pointer-events-none absolute -right-6 -bottom-8 opacity-30"
-                 style="background: radial-gradient(circle at 32% 28%, #ffffff 0%, #cbd5e1 35%, #475569 70%, #09090b 100%); box-shadow: inset -6px -8px 14px rgba(0,0,0,0.9), inset 4px 4px 10px rgba(255,255,255,0.65);">
+    <!-- =====================================================================
+         ОСНОВНИЙ КОНТЕНТ
+         ===================================================================== -->
+    <main class="container page-main">
+
+        <!-- РОЗДІЛ 1: КАТАЛОГ -->
+        <section id="view-catalog" class="view-stack">
+            <div class="catalog-top">
+                <h1 class="catalog-title silver-heading">NEBES6</h1>
             </div>
 
-            <div class="relative z-10 flex items-center justify-between gap-3">
-                <div class="space-y-2">
-                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 border border-white/20">
-                        <span class="w-2 h-2 rounded-full bg-slate-100 shadow-[0_0_8px_#fff]"></span>
-                        <span class="text-[11px] font-semibold tracking-wider text-slate-200">Liquid Chrome · Drop 06</span>
+            <div class="features-row">
+                <div class="feature-box">
+                    <div class="feature-box-title">Нова Пошта</div>
+                    <div class="feature-box-desc">Відправка 1–2 дні по Україні</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-box-title">Зручна оплата</div>
+                    <div class="feature-box-desc">При отриманні або за реквізитами</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-box-title">Обмін 14 днів</div>
+                    <div class="feature-box-desc">Підбір розміру та підтримка</div>
+                </div>
+            </div>
+
+            <div class="filter-controls">
+                <div class="search-sort-bar">
+                    <div class="search-box">
+                        <svg class="search-svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
+                        </svg>
+                        <input
+                            type="text"
+                            id="search-input"
+                            class="search-field"
+                            placeholder="Пошук одягу за назвою..."
+                            autocomplete="off"
+                        >
+                        <button
+                            type="button"
+                            id="clear-search-btn"
+                            class="clear-btn"
+                            data-action="clear-search"
+                            aria-label="Очистити пошук"
+                            hidden
+                        >✕</button>
                     </div>
 
-                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight chrome-text">
-                        Магазин одягу NEBES6
-                    </h1>
+                    <select id="sort-select" class="sort-field" aria-label="Сортування товарів">
+                        <option value="default">За популярністю</option>
+                        <option value="price-asc">Спочатку дешевші</option>
+                        <option value="price-desc">Спочатку дорожчі</option>
+                    </select>
+                </div>
 
-                    <p class="text-xs sm:text-sm text-slate-300 max-w-[265px] leading-relaxed">
-                        Дзеркальний хром, плинні металеві відблиски та щільні оверсайз-силуети для міста.
+                <div id="categories-bar" class="category-pills"></div>
+            </div>
+
+            <div class="catalog-status-bar">
+                <span id="catalog-count-label">Показано 6 товарів</span>
+                <button type="button" id="reset-filters-btn" class="text-action-link" data-action="reset-filters" hidden>
+                    Скинути фільтри
+                </button>
+            </div>
+
+            <div id="products-grid" class="products-grid"></div>
+
+            <!-- Блок зв'язку з менеджером унизу каталогу -->
+            <div class="catalog-manager-banner">
+                <div class="catalog-manager-copy">
+                    <h3 class="silver-heading">Зв’язатися з менеджером</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Потрібна допомога з розміром, заміри або деталі моделі? Напишіть напряму у Telegram менеджеру @Dobertryp.
                     </p>
                 </div>
-
-                <!-- Емблема / фото IMG_4925.png з хромованим SVG-резервом -->
-                <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-black/75 border border-white/25 shadow-[0_8px_20px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.35)] p-2 flex items-center justify-center shrink-0 overflow-hidden">
-                    <img
-                        src="IMG_4925.png"
-                        alt="NEBES6 Металевий Силует"
-                        class="w-full h-full object-contain rounded-xl hidden"
-                        onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
-                        onerror="this.remove();"
+                <div class="catalog-manager-btns">
+                    <button type="button" class="btn-silver" data-action="open-tg-chat" data-message="">
+                        Написати @Dobertryp
+                    </button>
+                    <button
+                        type="button"
+                        class="btn-dark"
+                        data-action="open-tg-chat"
+                        data-message="Вітаю! Хочу уточнити деталі щодо товару у NEBES6."
                     >
-                    <svg viewBox="0 0 140 120" class="w-full h-full" aria-label="NEBES6">
-                        <defs>
-                            <linearGradient id="heroChromeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ffffff"/>
-                                <stop offset="28%" stop-color="#e2e8f0"/>
-                                <stop offset="54%" stop-color="#64748b"/>
-                                <stop offset="80%" stop-color="#ffffff"/>
-                                <stop offset="100%" stop-color="#94a3b8"/>
-                            </linearGradient>
-                        </defs>
-                        <rect x="6" y="6" width="128" height="108" rx="18" fill="#0d0d11" stroke="url(#heroChromeGrad)" stroke-width="2"/>
-                        <text x="70" y="54" text-anchor="middle" fill="url(#heroChromeGrad)" font-family="Inter, sans-serif" font-weight="900" font-size="22" letter-spacing="3">NEBES</text>
-                        <text x="70" y="96" text-anchor="middle" fill="url(#heroChromeGrad)" font-family="Inter, sans-serif" font-weight="900" font-size="36">6</text>
-                    </svg>
+                        Уточнити деталі
+                    </button>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Фільтр за категоріями -->
-    <nav class="px-4 py-2.5 sticky top-[68px] z-20 bg-metalBg/85 backdrop-blur-md">
-        <div id="category-filters" class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            <!-- Кнопки категорій генеруються через JS -->
-        </div>
-    </nav>
+        <!-- РОЗДІЛ 2: ДОСТАВКА І ОПЛАТА -->
+        <section id="view-delivery" class="view-stack" hidden>
+            <div class="surface-card">
+                <h2 class="silver-heading">Доставка і оплата</h2>
+                <p>
+                    Усі замовлення магазину NEBES6 відправляються по Україні службою Нова Пошта після перевірки наявності та підтвердження менеджером.
+                </p>
+            </div>
 
-    <!-- Каталог товарів (6 позицій) -->
-    <main class="relative z-10 px-4 pt-2">
-        <div id="products-grid" class="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
-            <!-- Картки товарів генеруються через JS -->
-        </div>
+            <div class="two-cols">
+                <div class="surface-card">
+                    <h3>Доставка Новою Поштою</h3>
+                    <ul class="bullet-list">
+                        <li>• Відправка у відділення, поштомат або кур'єром Нової Пошти.</li>
+                        <li>• Орієнтовний термін доставки по Україні — 1–3 робочі дні.</li>
+                        <li>• Вартість доставки оплачується отримувачем за тарифами Нової Пошти.</li>
+                        <li>• Номер ТТН надсилаємо у Telegram одразу після відправки посилки.</li>
+                    </ul>
+                </div>
+
+                <div class="surface-card">
+                    <h3>Способи оплати</h3>
+                    <ul class="bullet-list">
+                        <li>• <strong>Накладений платіж</strong> — оплата при отриманні у відділенні Нової Пошти після огляду речі.</li>
+                        <li>• <strong>Оплата за реквізитами</strong> — оплата на рахунок без комісії перевізника за переказ коштів.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="surface-card">
+                <h3>Обмін та повернення</h3>
+                <p>
+                    Якщо розмір або посадка не підійшли, ви можете обміняти товар на інший розмір чи модель або оформити повернення протягом 14 днів з моменту отримання за умови збереження товарного вигляду та бірок.
+                </p>
+                <div>
+                    <button type="button" class="btn-silver" data-action="switch-tab" data-tab="catalog">
+                        Повернутися до каталогу
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- РОЗДІЛ 3: ЗВ'ЯЗАТИСЯ З МЕНЕДЖЕРОМ -->
+        <section id="view-manager" class="view-stack" hidden>
+            <div class="surface-card">
+                <h2 class="silver-heading">Зв’язатися з менеджером NEBES6</h2>
+                <p>
+                    Натисніть кнопку нижче, щоб відкрити особистий чат у Telegram з менеджером <strong>@Dobertryp</strong>. Допоможемо підібрати розмір за зростом і вагою, надішлемо заміри або уточнимо деталі замовлення.
+                </p>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button type="button" class="btn-silver" data-action="open-tg-chat" data-message="">
+                        Відкрити чат з @Dobertryp
+                    </button>
+                    <button type="button" class="btn-dark" data-action="copy-manager">
+                        Скопіювати нік @Dobertryp
+                    </button>
+                </div>
+
+                <div class="meta-grid-2">
+                    <div>
+                        <div style="color: var(--text-muted);">Графік відповідей</div>
+                        <div style="font-weight: 600; margin-top: 2px;">Щодня, 10:00 – 21:00</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-muted);">Середній час відповіді</div>
+                        <div style="font-weight: 600; margin-top: 2px;">5–15 хвилин</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-card">
+                <h3>Швидке уточнення деталей у чаті</h3>
+                <p>Оберіть потрібну тему — одразу відкриється чат із @Dobertryp та підготовленим текстом звернення:</p>
+
+                <div class="topics-list">
+                    <button
+                        type="button"
+                        class="topic-card-btn"
+                        data-action="open-tg-chat"
+                        data-message="Вітаю! Допоможіть, будь ласка, підібрати розмір у NEBES6 за моїми параметрами."
+                    >
+                        <span>Підібрати розмір за зростом і вагою</span>
+                        <span>→</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="topic-card-btn"
+                        data-action="open-tg-chat"
+                        data-message="Вітаю! Хочу уточнити наявність та попросити фото товару у NEBES6."
+                    >
+                        <span>Уточнити наявність і фото товару</span>
+                        <span>→</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="topic-card-btn"
+                        data-action="open-tg-chat"
+                        data-message="Вітаю! Підкажіть статус мого замовлення у NEBES6."
+                    >
+                        <span>Уточнити статус замовлення / ТТН</span>
+                        <span>→</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="topic-card-btn"
+                        data-action="open-tg-chat"
+                        data-message="Вітаю! Хочу оформити обмін розміру за замовленням у NEBES6."
+                    >
+                        <span>Питання щодо обміну або повернення</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="site-footer">
+            <span>NEBES6</span>
+            <button type="button" class="text-action-link" data-action="open-tg-chat" data-message="">
+                Менеджер: @Dobertryp
+            </button>
+        </footer>
     </main>
 
-    <!-- Спливаюче повідомлення (Toast) -->
-    <div id="toast-container" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-4">
-        <div class="chrome-btn px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-extrabold whitespace-nowrap">
-            <i data-lucide="check-circle-2" class="w-4 h-4 text-black"></i>
-            <span id="toast-message">Товар додано у кошик</span>
-        </div>
-    </div>
-
-    <!-- Плаваюча нижня панель кошика -->
-    <div id="floating-cart-bar" class="hidden fixed bottom-4 left-4 right-4 z-30 animate-slide-up">
-        <button onclick="openCart()" class="w-full chrome-btn font-extrabold py-3.5 px-5 rounded-2xl flex items-center justify-between transition">
-            <div class="flex items-center gap-2.5">
-                <span id="floating-cart-count" class="bg-black text-white text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
-                <span class="text-sm font-bold tracking-wide">Відкрити кошик</span>
-            </div>
-            <span id="floating-cart-total" class="text-sm font-black">0 ₴</span>
-        </button>
-    </div>
-
-    <!-- МОДАЛЬНЕ ВІКНО: ДЕТАЛІ ТОВАРУ -->
-    <div id="product-modal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in">
-        <div class="metal-surface w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] flex flex-col overflow-hidden animate-slide-up">
-            <div class="relative">
-                <button
-                    onclick="closeProductModal()"
-                    class="absolute top-4 right-4 z-10 bg-black/80 hover:bg-black text-white p-2 rounded-full border border-white/25 active:scale-90 transition"
-                    aria-label="Закрити вікно товару"
-                >
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                <div class="aspect-[4/4] sm:aspect-[16/11] w-full bg-metalElevated overflow-hidden">
-                    <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
-                </div>
+    <!-- =====================================================================
+         МОДАЛЬНЕ ВІКНО ДЕТАЛЕЙ ТОВАРУ
+         ===================================================================== -->
+    <div id="product-modal" class="modal-overlay" data-action="backdrop-close" data-modal="product-modal" hidden>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+            <div class="modal-header">
+                <h2 id="pm-title" class="modal-heading silver-heading">Назва товару</h2>
+                <button type="button" class="modal-close" data-action="close-modal" data-modal="product-modal" aria-label="Закрити">✕</button>
             </div>
 
-            <div class="p-5 overflow-y-auto space-y-4 flex-1">
-                <div class="flex justify-between items-start gap-3">
-                    <div>
-                        <span id="modal-category" class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Категорія</span>
-                        <h2 id="modal-title" class="text-xl font-extrabold text-white mt-0.5">Назва товару</h2>
-                    </div>
-                    <span id="modal-price" class="text-lg font-black whitespace-nowrap bg-black/75 text-slate-100 border border-white/20 px-3 py-1 rounded-xl">0 ₴</span>
+            <div class="modal-body">
+                <div id="pm-media" class="item-media" style="border-radius: 12px; border: 1px solid var(--border-subtle);"></div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span id="pm-price" style="font-size: 20px; font-weight: 800;">0 грн</span>
+                    <span style="font-size: 12px; color: var(--success); font-weight: 600;">В наявності</span>
                 </div>
 
-                <!-- Опис -->
-                <p id="modal-desc" class="text-sm text-slate-300 leading-relaxed"></p>
+                <p id="pm-description" style="font-size: 13px; color: var(--text-secondary);"></p>
 
-                <!-- Склад та крій -->
-                <div class="bg-black/65 p-3.5 rounded-2xl border border-white/15 space-y-2">
-                    <div class="flex items-start gap-2 text-xs text-slate-300">
-                        <i data-lucide="layers" class="w-4 h-4 text-slate-200 shrink-0 mt-0.5"></i>
-                        <div>
-                            <span class="font-bold text-white">Склад:</span>
-                            <span id="modal-material" class="ml-1 text-slate-300"></span>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-2 text-xs text-slate-300">
-                        <i data-lucide="scissors" class="w-4 h-4 text-slate-200 shrink-0 mt-0.5"></i>
-                        <div>
-                            <span class="font-bold text-white">Крій:</span>
-                            <span id="modal-fit" class="ml-1 text-slate-300"></span>
-                        </div>
-                    </div>
+                <div style="padding: 12px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+                    <div><span style="color: var(--text-muted);">Склад:</span> <span id="pm-material"></span></div>
+                    <div><span style="color: var(--text-muted);">Колір:</span> <span id="pm-color"></span></div>
+                    <div><span style="color: var(--text-muted);">Крій:</span> <span id="pm-fit"></span></div>
                 </div>
 
-                <!-- Вибір розміру -->
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Оберіть розмір</span>
-                        <span class="text-[11px] text-slate-400">Chrome Oversize</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: var(--text-secondary);">Оберіть розмір</span>
+                        <button type="button" class="text-action-link" data-action="open-size-guide">Таблиця розмірів</button>
                     </div>
-                    <div id="modal-sizes" class="grid grid-cols-4 gap-2">
-                        <!-- S, M, L, XL -->
-                    </div>
+                    <div id="pm-sizes" class="sizes-grid"></div>
                 </div>
             </div>
 
-            <!-- Кнопка додавання у кошик -->
-            <div class="p-4 bg-black/75 border-t border-white/15">
-                <button
-                    id="modal-add-btn"
-                    onclick="addSelectedProductToCart()"
-                    class="w-full chrome-btn font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-2 transition"
-                >
-                    <i data-lucide="plus" class="w-5 h-5"></i>
-                    <span>Додати у кошик</span>
+            <div class="modal-footer">
+                <button type="button" id="pm-add-btn" class="btn-silver" data-action="modal-add-to-cart">
+                    Додати в кошик
+                </button>
+                <button type="button" id="pm-ask-btn" class="btn-dark" data-action="ask-about-product">
+                    Запитати менеджера про цей товар
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- МОДАЛЬНЕ ВІКНО: КОШИК ТА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ -->
-    <div id="cart-modal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in">
-        <div class="metal-surface w-full max-w-lg rounded-t-3xl sm:rounded-3xl h-[92vh] sm:h-[86vh] flex flex-col overflow-hidden animate-slide-up">
-
-            <!-- Шапка кошика -->
-            <div class="px-5 py-4 border-b border-white/15 flex items-center justify-between bg-black/70">
-                <div class="flex items-center gap-2.5">
-                    <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-200"></i>
-                    <h2 class="text-base font-extrabold text-white">Ваш кошик</h2>
-                </div>
-                <button
-                    onclick="closeCart()"
-                    class="p-2 bg-metalElevated hover:bg-neutral-800 rounded-full text-slate-300 hover:text-white border border-white/15 transition"
-                    aria-label="Закрити кошик"
-                >
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+    <!-- =====================================================================
+         МОДАЛЬНЕ ВІКНО ТАБЛИЦІ РОЗМІРІВ
+         ===================================================================== -->
+    <div id="size-guide-modal" class="modal-overlay" data-action="backdrop-close" data-modal="size-guide-modal" hidden>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title">
+            <div class="modal-header">
+                <h2 id="sg-title" class="modal-heading silver-heading">Таблиця розмірів (см)</h2>
+                <button type="button" class="modal-close" data-action="close-modal" data-modal="size-guide-modal" aria-label="Закрити">✕</button>
             </div>
 
-            <!-- Список товарів та форма замовлення -->
-            <div id="cart-content" class="flex-1 overflow-y-auto p-5 space-y-6">
-                <div id="cart-items-list" class="space-y-3">
-                    <!-- Товари кошика -->
+            <div class="modal-body">
+                <div style="border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden;">
+                    <table class="size-chart-table">
+                        <thead>
+                            <tr>
+                                <th>Розмір</th>
+                                <th>Напівобхват грудей</th>
+                                <th>Довжина виробу</th>
+                                <th>Зріст</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>S</strong></td>
+                                <td>56 см</td>
+                                <td>68 см</td>
+                                <td>165–173 см</td>
+                            </tr>
+                            <tr>
+                                <td><strong>M</strong></td>
+                                <td>59 см</td>
+                                <td>71 см</td>
+                                <td>173–180 см</td>
+                            </tr>
+                            <tr>
+                                <td><strong>L</strong></td>
+                                <td>62 см</td>
+                                <td>74 см</td>
+                                <td>180–187 см</td>
+                            </tr>
+                            <tr>
+                                <td><strong>XL</strong></td>
+                                <td>65 см</td>
+                                <td>76 см</td>
+                                <td>185–195 см</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <form id="checkout-form" onsubmit="submitOrder(event)" class="space-y-4 pt-4 border-t border-white/15">
-                    <h3 class="text-sm font-extrabold text-white">Оформлення замовлення · Нова Пошта</h3>
+                <p style="font-size: 12px; color: var(--text-secondary);">
+                    Якщо вагаєтесь між двома розмірами, напишіть менеджеру — підберемо посадку за вашими параметрами.
+                </p>
+            </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">ПІБ *</label>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn-silver"
+                    data-action="open-tg-chat"
+                    data-message="Вітаю! Допоможіть підібрати розмір за таблицею NEBES6."
+                >
+                    Запитати @Dobertryp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         МОДАЛЬНЕ ВІКНО КОШИКА ТА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
+         ===================================================================== -->
+    <div id="cart-modal" class="modal-overlay" data-action="backdrop-close" data-modal="cart-modal" hidden>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+            <div class="modal-header">
+                <h2 id="cart-modal-title" class="modal-heading silver-heading">Кошик</h2>
+                <button type="button" class="modal-close" data-action="close-modal" data-modal="cart-modal" aria-label="Закрити">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div id="cart-items-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+
+                <div id="promo-section" hidden>
+                    <div class="promo-box">
                         <input
                             type="text"
-                            id="input-name"
-                            required
-                            placeholder="Наприклад: Тарас Шевченко"
-                            class="w-full bg-black/75 border border-white/20 focus:border-white rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
+                            id="promo-input"
+                            class="field-input"
+                            placeholder="Промокод (наприклад, NEBES10)"
+                            style="text-transform: uppercase;"
                         >
+                        <button type="button" class="btn-dark" data-action="apply-promo">
+                            Застосувати
+                        </button>
+                    </div>
+                    <p id="promo-feedback" style="font-size: 12px; margin-top: 6px;" hidden></p>
+                </div>
+
+                <form id="checkout-form" style="display: flex; flex-direction: column; gap: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);" hidden>
+                    <h3 style="font-size: 14px; font-weight: 700;">Дані для доставки</h3>
+
+                    <div class="field-group">
+                        <label class="field-label" for="input-name">Ім'я та прізвище *</label>
+                        <input type="text" id="input-name" class="field-input" required placeholder="Олександр Коваленко">
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Телефон *</label>
-                        <input
-                            type="tel"
-                            id="input-phone"
-                            required
-                            placeholder="+380 (67) 000-00-00"
-                            class="w-full bg-black/75 border border-white/20 focus:border-white rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
-                        >
+                    <div class="field-group">
+                        <label class="field-label" for="input-phone">Телефон *</label>
+                        <input type="tel" id="input-phone" class="field-input" required placeholder="+380 67 000 00 00">
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Місто *</label>
-                        <input
-                            type="text"
-                            id="input-city"
-                            required
-                            placeholder="Наприклад: Київ"
-                            class="w-full bg-black/75 border border-white/20 focus:border-white rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
-                        >
+                    <div class="two-cols">
+                        <div class="field-group">
+                            <label class="field-label" for="input-city">Місто *</label>
+                            <input type="text" id="input-city" class="field-input" required placeholder="Київ">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="input-np">Відділення або поштомат Нової Пошти *</label>
+                            <input type="text" id="input-np" class="field-input" required placeholder="Відділення №12">
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Відділення / поштомат Нової Пошти *</label>
-                        <input
-                            type="text"
-                            id="input-delivery"
-                            required
-                            placeholder="Відділення №24 або Поштомат №5102"
-                            class="w-full bg-black/75 border border-white/20 focus:border-white rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
-                        >
+                    <div class="field-group">
+                        <label class="field-label" for="input-payment">Спосіб оплати *</label>
+                        <select id="input-payment" class="field-input">
+                            <option value="Накладений платіж (Нова Пошта)">Накладений платіж (при отриманні)</option>
+                            <option value="Оплата за реквізитами">Оплата за реквізитами</option>
+                        </select>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Коментар</label>
-                        <textarea
-                            id="input-comment"
-                            rows="2"
-                            placeholder="Побажання щодо відправки або примірки..."
-                            class="w-full bg-black/75 border border-white/20 focus:border-white rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 outline-none transition resize-none"
-                        ></textarea>
+                    <div class="field-group">
+                        <label class="field-label" for="input-comment">Коментар (не обов'язково)</label>
+                        <input type="text" id="input-comment" class="field-input" placeholder="Наприклад: зріст 180 см, вага 75 кг">
                     </div>
                 </form>
             </div>
 
-            <!-- Підвал кошика -->
-            <div id="cart-footer" class="p-4 bg-black/80 border-t border-white/15 space-y-3">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-400 font-medium">Проміжний підсумок:</span>
-                    <span id="cart-total-price" class="text-xl font-black text-white">0 ₴</span>
+            <div id="cart-footer" class="modal-footer" hidden>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="total-row">
+                        <span>Сума товарів</span>
+                        <span id="cart-subtotal">0 грн</span>
+                    </div>
+                    <div id="cart-discount-line" class="total-row" style="color: var(--success);" hidden>
+                        <span>Знижка за промокодом</span>
+                        <span id="cart-discount">-0 грн</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Доставка (Нова Пошта)</span>
+                        <span>За тарифами перевізника</span>
+                    </div>
+                    <div class="total-final">
+                        <span>Разом за товари</span>
+                        <span id="cart-total">0 грн</span>
+                    </div>
                 </div>
-                <button
-                    type="submit"
-                    form="checkout-form"
-                    class="w-full chrome-btn font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-2 transition"
-                >
-                    <span>Підтвердити замовлення</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+
+                <button type="submit" form="checkout-form" class="btn-silver">
+                    Оформити замовлення
+                </button>
+                <button type="button" class="btn-dark" data-action="order-via-manager">
+                    Оформити напряму в чаті з @Dobertryp
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- МОДАЛЬНЕ ВІКНО: ПІДТВЕРДЖЕННЯ ЗАМОВЛЕННЯ -->
-    <div id="success-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-        <div class="metal-surface rounded-3xl p-6 max-w-sm w-full text-center space-y-4 animate-slide-up">
-            <div class="w-16 h-16 chrome-btn rounded-full flex items-center justify-center mx-auto">
-                <i data-lucide="check" class="w-8 h-8 text-black stroke-[3]"></i>
+    <!-- =====================================================================
+         МОДАЛЬНЕ ВІКНО ПІДТВЕРДЖЕННЯ ЗАМОВЛЕННЯ
+         ===================================================================== -->
+    <div id="confirmation-modal" class="modal-overlay" data-action="backdrop-close" data-modal="confirmation-modal" hidden>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="conf-title">
+            <div class="modal-header">
+                <h2 id="conf-title" class="modal-heading silver-heading">Замовлення прийнято</h2>
+                <button type="button" class="modal-close" data-action="close-modal" data-modal="confirmation-modal" aria-label="Закрити">✕</button>
             </div>
-            <h3 class="text-xl font-black text-white">Замовлення прийнято</h3>
-            <p id="order-delivery-status" class="text-xs text-slate-300 leading-relaxed">
-                Дякуємо за замовлення в <span class="text-white font-bold">NEBES6</span>. Дані замовлення сформовано.
-            </p>
-            <div id="order-summary-box" class="bg-black/75 p-3.5 rounded-2xl border border-white/15 text-left text-xs text-slate-300 space-y-1.5">
-                <!-- Деталі замовлення -->
+
+            <div class="modal-body">
+                <p id="conf-note" style="font-size: 13px; color: var(--text-secondary);"></p>
+                <div id="conf-details" style="padding: 14px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); font-size: 12px; display: flex; flex-direction: column; gap: 6px;"></div>
             </div>
-            <button
-                onclick="resetAfterOrder()"
-                class="w-full chrome-btn font-extrabold py-3 rounded-xl transition"
-            >
-                Повернутися до каталогу
-            </button>
+
+            <div class="modal-footer">
+                <button type="button" id="conf-tg-btn" class="btn-silver" data-action="open-tg-chat" data-message="">
+                    Написати менеджеру @Dobertryp
+                </button>
+                <button type="button" class="btn-dark" data-action="close-modal" data-modal="confirmation-modal">
+                    Закрити
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Спливаюче повідомлення -->
+    <div id="toast" class="toast-notice" role="status" aria-live="polite"></div>
+
     <script>
-        // ==========================================
-        // 1. ІНІЦІАЛІЗАЦІЯ TELEGRAM WEB APP API ТА ТЕМИ
-        // ==========================================
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        (function () {
+            'use strict';
 
-        function applyTelegramTheme() {
-            if (!tg) return;
-            try {
-                const tp = tg.themeParams || {};
-                const root = document.documentElement;
-                if (tp.bg_color) root.style.setProperty('--tg-bg-color', tp.bg_color);
-                if (tp.text_color) root.style.setProperty('--tg-text-color', tp.text_color);
+            // =====================================================================
+            // 1. ІНІЦІАЛІЗАЦІЯ TELEGRAM WEB APP
+            // =====================================================================
+            const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
 
-                if (typeof tg.setHeaderColor === 'function') {
-                    tg.setHeaderColor('#08080a');
+            if (tg) {
+                try {
+                    tg.ready();
+                    tg.expand();
+                    if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#0c0e12');
+                    if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#0c0e12');
+
+                    const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+                    if (user) {
+                        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+                        const nameInput = document.getElementById('input-name');
+                        if (fullName && nameInput && !nameInput.value) {
+                            nameInput.value = fullName;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Telegram WebApp init warning:', err);
                 }
-                if (typeof tg.setBackgroundColor === 'function') {
-                    tg.setBackgroundColor(tp.bg_color || '#08080a');
-                }
-            } catch (err) {
-                console.warn('Помилка застосування теми Telegram:', err);
             }
-        }
 
-        if (tg) {
-            try {
-                tg.ready();
-                tg.expand();
-                applyTelegramTheme();
-                if (typeof tg.onEvent === 'function') {
-                    tg.onEvent('themeChanged', applyTelegramTheme);
+            // =====================================================================
+            // 2. ДАНІ КАТАЛОГУ
+            // =====================================================================
+            const CATEGORIES = ['Усі', 'Худі', 'Штани', 'Футболки', 'Куртки'];
+            const SIZES = ['S', 'M', 'L', 'XL'];
+
+            const PRODUCTS = [
+                {
+                    id: 'nebes-hoodie-core',
+                    name: 'Худі NEBES6 Core',
+                    category: 'Худі',
+                    price: 2150,
+                    material: '100% бавовна, трьохнитка петля 420 г/м²',
+                    color: 'Графіт',
+                    fit: 'Вільний крій',
+                    description: 'Щільне базове худі зі спущеною лінією плеча, подвійним капюшоном та сріблястою вишивкою NEBES6.',
+                    svgType: 'hoodie'
+                },
+                {
+                    id: 'nebes-zip-chrome',
+                    name: 'Зіп-худі NEBES6 Chrome',
+                    category: 'Худі',
+                    price: 2390,
+                    material: '95% бавовна, 5% еластан, 400 г/м²',
+                    color: 'Сріблясто-сірий',
+                    fit: 'Вільний крій',
+                    description: 'Худі на двосторонній блискавці з об’ємними кишенями та посиленими манжетами.',
+                    svgType: 'zip'
+                },
+                {
+                    id: 'nebes-cargo-alloy',
+                    name: 'Штани карго NEBES6 Alloy',
+                    category: 'Штани',
+                    price: 2290,
+                    material: 'Щільний бавовняний твіл (290 г/м²)',
+                    color: 'Темний графіт',
+                    fit: 'Прямий вільний силует',
+                    description: 'Функціональні штани карго з об’ємними бічними кишенями та регульованими утяжками по низу штанини.',
+                    svgType: 'pants'
+                },
+                {
+                    id: 'nebes-joggers-mist',
+                    name: 'Джогери NEBES6 Mist',
+                    category: 'Штани',
+                    price: 1890,
+                    material: '100% бавовна, 380 г/м²',
+                    color: 'Сріблястий серпанок',
+                    fit: 'Комфортна посадка',
+                    description: 'Базові спортивні штани з еластичним поясом на шнурку та глибокими бічними кишенями.',
+                    svgType: 'pants'
+                },
+                {
+                    id: 'nebes-tee-heavy',
+                    name: 'Футболка NEBES6 Heavy',
+                    category: 'Футболки',
+                    price: 1190,
+                    material: '100% щільна бавовна, кулір 260 г/м²',
+                    color: 'Антрацит',
+                    fit: 'Вільний крій',
+                    description: 'Футболка зі щільного трикотажу, що добре тримає форму після прання, з ущільненою горловиною.',
+                    svgType: 'tee'
+                },
+                {
+                    id: 'nebes-jacket-shell',
+                    name: 'Куртка NEBES6 Shell',
+                    category: 'Куртки',
+                    price: 3690,
+                    material: 'Водовідштовхувальна мембранна тканина',
+                    color: 'Сріблясто-графітовий',
+                    fit: 'Вільний крій',
+                    description: 'Демісезонна куртка із захистом від вітру та вологи, високим коміром-стійкою і внутрішньою кишенею.',
+                    svgType: 'jacket'
                 }
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    const user = tg.initDataUnsafe.user;
-                    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
-                    const nameInput = document.getElementById('input-name');
-                    if (fullName && nameInput && !nameInput.value) {
-                        nameInput.value = fullName;
+            ];
+
+            // =====================================================================
+            // 3. СТАН ДОДАТКУ
+            // =====================================================================
+            const state = {
+                activeTab: 'catalog',
+                activeCategory: 'Усі',
+                searchQuery: '',
+                sortBy: 'default',
+                selectedSizes: {},
+                cart: [],
+                promoCode: '',
+                promoPercent: 0,
+                modalProductId: null
+            };
+
+            PRODUCTS.forEach(p => {
+                state.selectedSizes[p.id] = 'M';
+            });
+
+            // =====================================================================
+            // 4. SVG-ІЛЮСТРАЦІЇ МОДЕЛЕЙ ОДЯГУ
+            // =====================================================================
+            function getGarmentSVG(type, sizePx) {
+                const s = sizePx || 96;
+                const stroke = '#f8fafc';
+                const fill = 'rgba(226, 232, 240, 0.14)';
+
+                const shapes = {
+                    hoodie: `
+                        <path d="M36 22 C40 14, 56 14, 60 22 L76 32 L84 62 L72 66 L66 44 L66 80 L30 80 L30 44 L24 66 L12 62 L20 32 Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M40 22 Q48 32 56 22" fill="none" stroke="${stroke}" stroke-width="2"/>
+                        <rect x="37" y="56" width="22" height="14" rx="4" fill="none" stroke="${stroke}" stroke-width="1.6"/>
+                    `,
+                    zip: `
+                        <path d="M36 22 C40 14, 56 14, 60 22 L76 32 L84 62 L72 66 L66 44 L66 80 L30 80 L30 44 L24 66 L12 62 L20 32 Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="48" y1="24" x2="48" y2="80" stroke="${stroke}" stroke-width="2"/>
+                    `,
+                    pants: `
+                        <path d="M32 16 L64 16 L70 82 L54 82 L48 44 L42 82 L26 82 Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="31" y1="24" x2="65" y2="24" stroke="${stroke}" stroke-width="1.6"/>
+                    `,
+                    tee: `
+                        <path d="M36 20 Q48 28 60 20 L80 32 L72 46 L64 42 L64 78 L32 78 L32 42 L24 46 L16 32 Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+                    `,
+                    jacket: `
+                        <path d="M34 18 L62 18 L78 30 L84 64 L71 67 L66 44 L66 80 L30 80 L30 44 L25 67 L12 64 L18 30 Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="48" y1="18" x2="48" y2="80" stroke="${stroke}" stroke-width="2"/>
+                        <path d="M34 18 L48 28 L62 18" fill="none" stroke="${stroke}" stroke-width="1.8"/>
+                    `
+                };
+
+                return `<svg width="${s}" height="${s}" viewBox="0 0 96 96" aria-hidden="true">${shapes[type] || shapes.hoodie}</svg>`;
+            }
+
+            // =====================================================================
+            // 5. ПЕРЕХІД У ЧАТ З МЕНЕДЖЕРОМ @Dobertryp
+            // =====================================================================
+            function openManagerChat(prefilledMessage) {
+                const baseUrl = 'https://t.me/Dobertryp';
+                const targetUrl = prefilledMessage
+                    ? `${baseUrl}?text=${encodeURIComponent(prefilledMessage)}`
+                    : baseUrl;
+
+                if (tg && typeof tg.openTelegramLink === 'function') {
+                    try {
+                        tg.openTelegramLink(targetUrl);
+                        return;
+                    } catch (err) {
+                        console.warn('tg.openTelegramLink fallback:', err);
                     }
                 }
-            } catch (err) {
-                console.warn('Telegram WebApp ініціалізація частково обмежена:', err);
-            }
-        }
 
-        // ==========================================
-        // 2. КАТАЛОГ ОДЯГУ NEBES6 (6 ПОЗИЦІЙ)
-        // ==========================================
-        const products = [
-            {
-                id: 'chrome-hoodie-01',
-                name: 'Худі NEBES6 "CHROME 06" Heavy',
-                category: 'Худі',
-                price: 2590,
-                material: '100% бавовна (щільний трикотаж футер трьохнитка, 460 г/м²)',
-                fit: 'Вільний оверсайз-крій, спущене плече, подвійний капюшон',
-                description: 'Щільне худі з дзеркальною графікою NEBES6 та м’яким металічним відблиском фактури. Створене для холодного міського ритму та чіткого силуету.',
-                image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            },
-            {
-                id: 'chrome-pants-02',
-                name: 'Штани Карго "LIQUID METAL" Utility',
-                category: 'Штани',
-                price: 2790,
-                material: '97% бавовна ріп-стоп, 3% еластан',
-                fit: 'Широкий прямий крій з регульованими кулісками по низу',
-                description: 'Функціональні штани карго з об’ємними кишенями та металевою фурнітурою. Легко поєднуються з важкими худі та верхнім одягом.',
-                image: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            },
-            {
-                id: 'chrome-tee-03',
-                name: 'Футболка "SILVER FLOW" Boxy',
-                category: 'Футболки',
-                price: 1290,
-                material: '100% бавовна (щільний кулір, 260 г/м²)',
-                fit: 'Boxy оверсайз, вкорочена довжина, подовжений рукав',
-                description: 'Щільна футболка з хромованим акцентом NEBES6. Добре тримає форму та створює виразний об’єм.',
-                image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            },
-            {
-                id: 'chrome-jacket-04',
-                name: 'Куртка-Бомбер "MIRROR SHELL" MA-1',
-                category: 'Верхній одяг',
-                price: 4390,
-                material: '100% водовідштовхувальний нейлон з легким металічним блиском',
-                fit: 'Об’ємний оверсайз-бомбер із щільними трикотажними манжетами',
-                description: 'Верхній оверсайз-бомбер із хромованою блискавкою та захистом від вітру і дощу.',
-                image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            },
-            {
-                id: 'chrome-tee-05',
-                name: 'Футболка "ALLOY WAVE" Double Layer',
-                category: 'Футболки',
-                price: 1490,
-                material: '100% бавовна (250 г/м²)',
-                fit: 'Вільний оверсайз з ефектом багатошаровості',
-                description: 'Футболка з контрастною багатошаровою посадкою та хромованими деталями NEBES6 для багатошарових образів.',
-                image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            },
-            {
-                id: 'chrome-hoodie-06',
-                name: 'Зіп-Худі "STEEL DROP" Washed',
-                category: 'Худі',
-                price: 2890,
-                material: '100% бавовна (важкий футер, 480 г/м²)',
-                fit: 'Оверсайз-крій на блискавці з об’ємним капюшоном',
-                description: 'Зіп-худі з металевим ефектом прання та двосторонньою блискавкою. Максимальна щільність і комфорт у кожній деталі.',
-                image: 'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?auto=format&fit=crop&w=800&q=80',
-                sizes: ['S', 'M', 'L', 'XL']
-            }
-        ];
-
-        // ==========================================
-        // 3. СТАН ДОДАТКУ
-        // ==========================================
-        let currentCategory = 'Усі';
-        let cart = [];
-        let selectedProduct = null;
-        let selectedSize = 'M';
-
-        // ==========================================
-        // 4. КАТЕГОРІЇ ТА КАТАЛОГ
-        // ==========================================
-        function renderCategories() {
-            const categories = ['Усі', 'Худі', 'Штани', 'Футболки', 'Верхній одяг'];
-            const container = document.getElementById('category-filters');
-
-            container.innerHTML = categories.map(category => {
-                const isActive = category === currentCategory;
-                return `
-                    <button
-                        onclick="filterByCategory('${category.replace(/'/g, "\\'")}')"
-                        class="px-4 py-2 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap transition active:scale-95 ${
-                            isActive
-                                ? 'chrome-btn'
-                                : 'metal-surface text-slate-300 hover:text-white'
-                        }"
-                    >
-                        ${category}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function filterByCategory(category) {
-            currentCategory = category;
-            renderCategories();
-            renderProducts();
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.selectionChanged === 'function') {
-                tg.HapticFeedback.selectionChanged();
-            }
-        }
-
-        function renderProducts() {
-            const grid = document.getElementById('products-grid');
-            const filtered = currentCategory === 'Усі'
-                ? products
-                : products.filter(item => item.category === currentCategory);
-
-            grid.innerHTML = filtered.map(product => `
-                <div
-                    onclick="openProductModal('${product.id}')"
-                    class="metal-surface metal-surface-hover rounded-2xl overflow-hidden flex flex-col justify-between group cursor-pointer active:scale-[0.98] transition"
-                >
-                    <div>
-                        <div class="aspect-[4/5] w-full bg-metalElevated overflow-hidden relative">
-                            <img
-                                src="${product.image}"
-                                alt="${product.name}"
-                                loading="lazy"
-                                onerror="this.src='https://placehold.co/400x500/121216/e2e8f0?text=NEBES6'"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                            >
-                            <span class="absolute top-2.5 left-2.5 bg-black/80 text-slate-100 text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-full border border-white/20">
-                                ${product.category}
-                            </span>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug">
-                                ${product.name}
-                            </h3>
-                        </div>
-                    </div>
-                    <div class="px-3 pb-3 flex items-center justify-between">
-                        <span class="text-sm font-black text-white">${product.price.toLocaleString('uk-UA')} ₴</span>
-                        <span class="w-7 h-7 rounded-lg bg-metalElevated group-hover:bg-white group-hover:text-black text-slate-200 border border-white/15 flex items-center justify-center transition">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        // ==========================================
-        // 5. МОДАЛЬНЕ ВІКНО ТОВАРУ ТА РОЗМІРИ
-        // ==========================================
-        function openProductModal(productId) {
-            selectedProduct = products.find(item => item.id === productId);
-            if (!selectedProduct) return;
-
-            selectedSize = 'M';
-
-            document.getElementById('modal-img').src = selectedProduct.image;
-            document.getElementById('modal-img').alt = selectedProduct.name;
-            document.getElementById('modal-category').textContent = selectedProduct.category;
-            document.getElementById('modal-title').textContent = selectedProduct.name;
-            document.getElementById('modal-price').textContent = `${selectedProduct.price.toLocaleString('uk-UA')} ₴`;
-            document.getElementById('modal-desc').textContent = selectedProduct.description;
-            document.getElementById('modal-material').textContent = selectedProduct.material;
-            document.getElementById('modal-fit').textContent = selectedProduct.fit;
-
-            renderSizeButtons();
-
-            document.getElementById('product-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        function renderSizeButtons() {
-            const container = document.getElementById('modal-sizes');
-            container.innerHTML = selectedProduct.sizes.map(size => {
-                const isSelected = size === selectedSize;
-                return `
-                    <button
-                        type="button"
-                        onclick="selectSize('${size}')"
-                        class="py-2.5 rounded-xl text-xs font-black uppercase transition active:scale-95 ${
-                            isSelected
-                                ? 'chrome-btn'
-                                : 'bg-black/75 text-slate-300 border border-white/15 hover:border-white/40'
-                        }"
-                    >
-                        ${size}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function selectSize(size) {
-            selectedSize = size;
-            renderSizeButtons();
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.selectionChanged === 'function') {
-                tg.HapticFeedback.selectionChanged();
-            }
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-
-        // ==========================================
-        // 6. КОШИК
-        // ==========================================
-        function addSelectedProductToCart() {
-            if (!selectedProduct) return;
-
-            const existingIndex = cart.findIndex(
-                item => item.productId === selectedProduct.id && item.size === selectedSize
-            );
-
-            if (existingIndex > -1) {
-                cart[existingIndex].quantity += 1;
-            } else {
-                cart.push({
-                    productId: selectedProduct.id,
-                    name: selectedProduct.name,
-                    price: selectedProduct.price,
-                    size: selectedSize,
-                    quantity: 1,
-                    image: selectedProduct.image
-                });
-            }
-
-            updateCartUI();
-            closeProductModal();
-            showToast(`Додано у кошик: ${selectedProduct.name} (${selectedSize})`);
-
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred === 'function') {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        }
-
-        function changeQuantity(index, delta) {
-            if (!cart[index]) return;
-            cart[index].quantity += delta;
-            if (cart[index].quantity <= 0) {
-                cart.splice(index, 1);
-            }
-            updateCartUI();
-            renderCartItems();
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        function removeItem(index) {
-            if (!cart[index]) return;
-            cart.splice(index, 1);
-            updateCartUI();
-            renderCartItems();
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                tg.HapticFeedback.impactOccurred('medium');
-            }
-        }
-
-        function updateCartUI() {
-            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-            const headerBadge = document.getElementById('header-cart-badge');
-            if (totalCount > 0) {
-                headerBadge.textContent = totalCount;
-                headerBadge.classList.remove('hidden');
-            } else {
-                headerBadge.classList.add('hidden');
-            }
-
-            const floatingBar = document.getElementById('floating-cart-bar');
-            if (totalCount > 0) {
-                document.getElementById('floating-cart-count').textContent = totalCount;
-                document.getElementById('floating-cart-total').textContent = `${totalPrice.toLocaleString('uk-UA')} ₴`;
-                floatingBar.classList.remove('hidden');
-            } else {
-                floatingBar.classList.add('hidden');
-            }
-
-            document.getElementById('cart-total-price').textContent = `${totalPrice.toLocaleString('uk-UA')} ₴`;
-        }
-
-        function openCart() {
-            renderCartItems();
-            document.getElementById('cart-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeCart() {
-            document.getElementById('cart-modal').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-
-        function renderCartItems() {
-            const listContainer = document.getElementById('cart-items-list');
-            const checkoutForm = document.getElementById('checkout-form');
-            const cartFooter = document.getElementById('cart-footer');
-
-            if (cart.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="py-12 text-center space-y-3">
-                        <div class="w-14 h-14 bg-metalElevated rounded-2xl border border-white/15 flex items-center justify-center mx-auto text-slate-200">
-                            <i data-lucide="shopping-bag" class="w-6 h-6"></i>
-                        </div>
-                        <p class="text-sm font-bold text-white">Кошик порожній</p>
-                        <p class="text-xs text-slate-400">Оберіть речі з каталогу NEBES6, щоб оформити замовлення.</p>
-                    </div>
-                `;
-                checkoutForm.classList.add('hidden');
-                cartFooter.classList.add('hidden');
-                lucide.createIcons();
-                return;
-            }
-
-            checkoutForm.classList.remove('hidden');
-            cartFooter.classList.remove('hidden');
-
-            listContainer.innerHTML = cart.map((item, index) => `
-                <div class="bg-black/70 border border-white/15 rounded-2xl p-3 flex gap-3 items-center">
-                    <img
-                        src="${item.image}"
-                        alt="${item.name}"
-                        onerror="this.src='https://placehold.co/120x160/121216/e2e8f0?text=NEBES6'"
-                        class="w-16 h-20 object-cover rounded-xl bg-metalElevated shrink-0 border border-white/15"
-                    >
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-start gap-2">
-                            <h4 class="text-xs font-bold text-white truncate">${item.name}</h4>
-                            <button
-                                onclick="removeItem(${index})"
-                                class="text-slate-500 hover:text-red-400 p-1 transition"
-                                aria-label="Видалити позицію"
-                            >
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-0.5">
-                            Розмір: <span class="text-white font-bold">${item.size}</span>
-                        </p>
-                        <div class="flex items-center justify-between mt-2.5">
-                            <span class="text-xs font-black text-white">${(item.price * item.quantity).toLocaleString('uk-UA')} ₴</span>
-                            <div class="flex items-center gap-2 bg-metalElevated border border-white/15 rounded-lg px-1.5 py-0.5">
-                                <button onclick="changeQuantity(${index}, -1)" class="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white active:scale-90">-</button>
-                                <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
-                                <button onclick="changeQuantity(${index}, 1)" class="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white active:scale-90">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        // ==========================================
-        // 7. ОФОРМЛЕННЯ ЗАМОВЛЕННЯ ТА TELEGRAM sendData
-        // ==========================================
-        function submitOrder(event) {
-            event.preventDefault();
-            if (cart.length === 0) return;
-
-            const name = document.getElementById('input-name').value.trim();
-            const phone = document.getElementById('input-phone').value.trim();
-            const city = document.getElementById('input-city').value.trim();
-            const delivery = document.getElementById('input-delivery').value.trim();
-            const comment = document.getElementById('input-comment').value.trim();
-            const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-            const orderPayload = {
-                brand: 'NEBES6',
-                style: 'Liquid Chrome',
-                customer: {
-                    name,
-                    phone,
-                    city,
-                    novaPoshta: delivery,
-                    comment: comment || 'Без коментаря'
-                },
-                items: cart.map(item => ({
-                    id: item.productId,
-                    name: item.name,
-                    size: item.size,
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                subtotalUAH: totalAmount,
-                createdAt: new Date().toISOString()
-            };
-
-            let sentToTelegram = false;
-            if (tg && typeof tg.sendData === 'function' && tg.initData && tg.initData.length > 0) {
-                try {
-                    tg.sendData(JSON.stringify(orderPayload));
-                    sentToTelegram = true;
-                } catch (err) {
-                    console.warn('Не вдалося відправити дані через tg.sendData():', err);
+                const win = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                if (!win) {
+                    window.location.href = targetUrl;
                 }
             }
 
-            if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred === 'function') {
-                tg.HapticFeedback.notificationOccurred('success');
+            // =====================================================================
+            // 6. РЕНДЕРИНГ НАВІГАЦІЇ, КАТЕГОРІЙ ТА КАТАЛОГУ
+            // =====================================================================
+            function switchTab(tabName) {
+                state.activeTab = tabName;
+
+                document.querySelectorAll('.nav-tab').forEach(btn => {
+                    btn.classList.toggle('is-active', btn.dataset.tab === tabName);
+                });
+
+                document.getElementById('view-catalog').hidden = tabName !== 'catalog';
+                document.getElementById('view-delivery').hidden = tabName !== 'delivery';
+                document.getElementById('view-manager').hidden = tabName !== 'manager';
             }
 
-            closeCart();
-            showSuccessModal(orderPayload, sentToTelegram);
-        }
+            function renderCategories() {
+                const container = document.getElementById('categories-bar');
+                container.innerHTML = CATEGORIES.map(cat => {
+                    const isActive = state.activeCategory === cat;
+                    return `
+                        <button
+                            type="button"
+                            class="cat-pill ${isActive ? 'is-active' : ''}"
+                            data-action="select-category"
+                            data-category="${cat}"
+                        >${cat}</button>
+                    `;
+                }).join('');
+            }
 
-        function showSuccessModal(orderPayload, sentToTelegram) {
-            const statusEl = document.getElementById('order-delivery-status');
-            statusEl.innerHTML = sentToTelegram
-                ? 'Дані замовлення передано у <span class="text-white font-bold">Telegram-бот NEBES6</span>. Очікуйте на підтвердження менеджера.'
-                : 'Замовлення сформовано у режимі перегляду поза Telegram. Збережіть деталі або відкрийте додаток через бота.';
+            function getFilteredProducts() {
+                let list = PRODUCTS.filter(p => {
+                    if (state.activeCategory !== 'Усі' && p.category !== state.activeCategory) {
+                        return false;
+                    }
 
-            const summaryBox = document.getElementById('order-summary-box');
-            const itemsHtml = orderPayload.items
-                .map(i => `<div>• ${i.name} [${i.size}] × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('uk-UA')} ₴</div>`)
-                .join('');
+                    if (state.searchQuery.trim() !== '') {
+                        const q = state.searchQuery.trim().toLowerCase();
+                        const matchName = p.name.toLowerCase().includes(q);
+                        const matchCat = p.category.toLowerCase().includes(q);
+                        if (!matchName && !matchCat) return false;
+                    }
 
-            summaryBox.innerHTML = `
-                <div><span class="text-slate-500">ПІБ:</span> <span class="text-white font-semibold">${orderPayload.customer.name}</span></div>
-                <div><span class="text-slate-500">Телефон:</span> <span class="text-white font-semibold">${orderPayload.customer.phone}</span></div>
-                <div><span class="text-slate-500">Місто:</span> <span class="text-white font-semibold">${orderPayload.customer.city}</span></div>
-                <div><span class="text-slate-500">Нова Пошта:</span> <span class="text-white font-semibold">${orderPayload.customer.novaPoshta}</span></div>
-                <div class="border-t border-white/15 my-1.5 pt-1.5 space-y-1">${itemsHtml}</div>
-                <div class="pt-1 text-white font-black">Проміжний підсумок: ${orderPayload.subtotalUAH.toLocaleString('uk-UA')} ₴</div>
-            `;
+                    return true;
+                });
 
-            document.getElementById('success-modal').classList.remove('hidden');
-            lucide.createIcons();
-        }
+                if (state.sortBy === 'price-asc') {
+                    list = [...list].sort((a, b) => a.price - b.price);
+                } else if (state.sortBy === 'price-desc') {
+                    list = [...list].sort((a, b) => b.price - a.price);
+                }
 
-        function resetAfterOrder() {
-            cart = [];
-            updateCartUI();
-            document.getElementById('input-comment').value = '';
-            document.getElementById('success-modal').classList.add('hidden');
-        }
+                return list;
+            }
 
-        // ==========================================
-        // 8. СПОВІЩЕННЯ, ХРОМОВИЙ ВІДБЛИСК ТА ПОДІЇ
-        // ==========================================
-        let toastTimer = null;
-        function showToast(message) {
-            const toast = document.getElementById('toast-container');
-            document.getElementById('toast-message').textContent = message;
-            toast.classList.remove('opacity-0', 'translate-y-4');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-            }, 2200);
-        }
+            function renderProducts() {
+                const grid = document.getElementById('products-grid');
+                const countLabel = document.getElementById('catalog-count-label');
+                const resetBtn = document.getElementById('reset-filters-btn');
+                const items = getFilteredProducts();
 
-        function initChromeSheen() {
-            const sheen = document.getElementById('chrome-sheen');
-            if (!sheen) return;
+                const hasFilters = state.activeCategory !== 'Усі' || state.searchQuery.trim() !== '' || state.sortBy !== 'default';
+                resetBtn.hidden = !hasFilters;
 
-            const moveSheen = (clientX, clientY) => {
-                sheen.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
-                sheen.style.opacity = '1';
-            };
+                const word = items.length === 1 ? 'товар' : (items.length >= 2 && items.length <= 4 ? 'товари' : 'товарів');
+                countLabel.textContent = `Показано ${items.length} ${word}`;
 
-            window.addEventListener('pointermove', (e) => {
-                moveSheen(e.clientX, e.clientY);
-            }, { passive: true });
+                if (items.length === 0) {
+                    grid.innerHTML = `
+                        <div class="surface-card" style="grid-column: 1 / -1; text-align: center; align-items: center; padding: 36px 20px;">
+                            <h3>Товарів не знайдено</h3>
+                            <p>Спробуйте змінити пошуковий запит або скинути обрану категорію.</p>
+                            <button type="button" class="btn-silver" data-action="reset-filters">Показати всі товари</button>
+                        </div>
+                    `;
+                    return;
+                }
 
-            window.addEventListener('pointerdown', (e) => {
-                moveSheen(e.clientX, e.clientY);
-            }, { passive: true });
+                grid.innerHTML = items.map(product => {
+                    const selectedSize = state.selectedSizes[product.id] || 'M';
 
-            window.addEventListener('pointerleave', () => {
-                sheen.style.opacity = '0';
+                    const sizeButtons = SIZES.map(sz => `
+                        <button
+                            type="button"
+                            class="size-btn ${selectedSize === sz ? 'is-selected' : ''}"
+                            data-action="select-size"
+                            data-id="${product.id}"
+                            data-size="${sz}"
+                        >${sz}</button>
+                    `).join('');
+
+                    return `
+                        <article class="item-card">
+                            <div class="item-media">
+                                <span class="item-cat-tag">${product.category}</span>
+                                <button
+                                    type="button"
+                                    class="item-media-btn"
+                                    data-action="open-product"
+                                    data-id="${product.id}"
+                                    aria-label="Детальніше про ${product.name}"
+                                >
+                                    ${getGarmentSVG(product.svgType, 108)}
+                                </button>
+                            </div>
+
+                            <div class="item-body">
+                                <div class="item-top">
+                                    <button
+                                        type="button"
+                                        class="item-name-btn"
+                                        data-action="open-product"
+                                        data-id="${product.id}"
+                                    >${product.name}</button>
+                                    <span class="item-price">${product.price.toLocaleString('uk-UA')} грн</span>
+                                </div>
+
+                                <div class="item-fit">${product.fit}</div>
+
+                                <div class="sizes-grid" role="group" aria-label="Вибір розміру">
+                                    ${sizeButtons}
+                                </div>
+
+                                <div class="item-actions">
+                                    <button
+                                        type="button"
+                                        class="btn-silver"
+                                        data-action="add-to-cart"
+                                        data-id="${product.id}"
+                                    >Додати в кошик</button>
+
+                                    <button
+                                        type="button"
+                                        class="btn-dark"
+                                        data-action="open-product"
+                                        data-id="${product.id}"
+                                    >Деталі</button>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            function updateCartBadge() {
+                const totalQty = state.cart.reduce((acc, item) => acc + item.quantity, 0);
+                document.getElementById('cart-count').textContent = String(totalQty);
+            }
+
+            // =====================================================================
+            // 7. МОДАЛЬНЕ ВІКНО ТОВАРУ
+            // =====================================================================
+            function openProductModal(productId) {
+                const product = PRODUCTS.find(p => p.id === productId);
+                if (!product) return;
+
+                state.modalProductId = product.id;
+                const selectedSize = state.selectedSizes[product.id] || 'M';
+
+                document.getElementById('pm-title').textContent = product.name;
+                document.getElementById('pm-media').innerHTML = getGarmentSVG(product.svgType, 132);
+                document.getElementById('pm-price').textContent = `${product.price.toLocaleString('uk-UA')} грн`;
+                document.getElementById('pm-description').textContent = product.description;
+                document.getElementById('pm-material').textContent = product.material;
+                document.getElementById('pm-color').textContent = product.color;
+                document.getElementById('pm-fit').textContent = product.fit;
+
+                document.getElementById('pm-sizes').innerHTML = SIZES.map(sz => `
+                    <button
+                        type="button"
+                        class="size-btn ${selectedSize === sz ? 'is-selected' : ''}"
+                        data-action="modal-select-size"
+                        data-id="${product.id}"
+                        data-size="${sz}"
+                    >${sz}</button>
+                `).join('');
+
+                openModal('product-modal');
+            }
+
+            // =====================================================================
+            // 8. КОШИК ТА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
+            // =====================================================================
+            function addToCart(productId, sizeOverride) {
+                const product = PRODUCTS.find(p => p.id === productId);
+                if (!product) return;
+
+                const size = sizeOverride || state.selectedSizes[productId] || 'M';
+                const existing = state.cart.find(item => item.id === product.id && item.size === size);
+
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    state.cart.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        size,
+                        quantity: 1
+                    });
+                }
+
+                updateCartBadge();
+                renderCart();
+                showToast(`Додано: ${product.name} (${size})`);
+
+                if (tg && tg.HapticFeedback) {
+                    try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
+                }
+            }
+
+            function renderCart() {
+                const listEl = document.getElementById('cart-items-list');
+                const promoSection = document.getElementById('promo-section');
+                const formEl = document.getElementById('checkout-form');
+                const footerEl = document.getElementById('cart-footer');
+
+                if (state.cart.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 32px 12px;">
+                            <p style="font-weight: 700; margin-bottom: 4px;">Ваш кошик порожній</p>
+                            <p style="font-size: 12px; color: var(--text-secondary);">Оберіть потрібні речі в каталозі магазину.</p>
+                        </div>
+                    `;
+                    promoSection.hidden = true;
+                    formEl.hidden = true;
+                    footerEl.hidden = true;
+                    return;
+                }
+
+                promoSection.hidden = false;
+                formEl.hidden = false;
+                footerEl.hidden = false;
+
+                listEl.innerHTML = state.cart.map((item, idx) => `
+                    <div class="cart-row">
+                        <div class="cart-row-info">
+                            <div class="cart-row-title">${item.name}</div>
+                            <div class="cart-row-sub">Розмір: <strong>${item.size}</strong> • ${(item.price * item.quantity).toLocaleString('uk-UA')} грн</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div class="stepper">
+                                <button type="button" class="stepper-btn" data-action="cart-qty" data-index="${idx}" data-delta="-1" aria-label="Зменшити">−</button>
+                                <span class="stepper-num">${item.quantity}</span>
+                                <button type="button" class="stepper-btn" data-action="cart-qty" data-index="${idx}" data-delta="1" aria-label="Збільшити">+</button>
+                            </div>
+                            <button type="button" class="remove-row-btn" data-action="cart-remove" data-index="${idx}" aria-label="Видалити">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                const discount = Math.round(subtotal * (state.promoPercent / 100));
+                const total = subtotal - discount;
+
+                document.getElementById('cart-subtotal').textContent = `${subtotal.toLocaleString('uk-UA')} грн`;
+                const discountLine = document.getElementById('cart-discount-line');
+                if (discount > 0) {
+                    discountLine.hidden = false;
+                    document.getElementById('cart-discount').textContent = `-${discount.toLocaleString('uk-UA')} грн`;
+                } else {
+                    discountLine.hidden = true;
+                }
+                document.getElementById('cart-total').textContent = `${total.toLocaleString('uk-UA')} грн`;
+            }
+
+            function applyPromoCode() {
+                const input = document.getElementById('promo-input');
+                const feedback = document.getElementById('promo-feedback');
+                const code = input.value.trim().toUpperCase();
+
+                feedback.hidden = false;
+                if (code === 'NEBES10') {
+                    state.promoCode = 'NEBES10';
+                    state.promoPercent = 10;
+                    feedback.style.color = 'var(--success)';
+                    feedback.textContent = 'Промокод NEBES10 застосовано: знижка 10%.';
+                    showToast('Промокод NEBES10 застосовано (-10%)');
+                } else {
+                    state.promoCode = '';
+                    state.promoPercent = 0;
+                    feedback.style.color = 'var(--danger)';
+                    feedback.textContent = 'Промокод не знайдено. Спробуйте NEBES10.';
+                }
+                renderCart();
+            }
+
+            function buildOrderSummaryText(customerData) {
+                const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                const discount = Math.round(subtotal * (state.promoPercent / 100));
+                const total = subtotal - discount;
+
+                const itemsText = state.cart
+                    .map(i => `• ${i.name} (${i.size}) × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('uk-UA')} грн`)
+                    .join('\n');
+
+                let text = `Замовлення NEBES6:\n${itemsText}\nСума товарів: ${total.toLocaleString('uk-UA')} грн\nДоставка: за тарифами Нової Пошти`;
+                if (state.promoCode) {
+                    text += ` (промокод ${state.promoCode})`;
+                }
+                if (customerData && customerData.name) {
+                    text += `\nОтримувач: ${customerData.name}, ${customerData.phone}\nДоставка: ${customerData.city}, ${customerData.novaPoshta}\nОплата: ${customerData.payment}`;
+                    if (customerData.comment) {
+                        text += `\nКоментар: ${customerData.comment}`;
+                    }
+                }
+                return text;
+            }
+
+            function handleCheckoutSubmit(event) {
+                event.preventDefault();
+                if (state.cart.length === 0) return;
+
+                const customer = {
+                    name: document.getElementById('input-name').value.trim(),
+                    phone: document.getElementById('input-phone').value.trim(),
+                    city: document.getElementById('input-city').value.trim(),
+                    novaPoshta: document.getElementById('input-np').value.trim(),
+                    payment: document.getElementById('input-payment').value,
+                    comment: document.getElementById('input-comment').value.trim()
+                };
+
+                const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                const discount = Math.round(subtotal * (state.promoPercent / 100));
+                const totalUAH = subtotal - discount;
+
+                const payload = {
+                    shop: 'NEBES6',
+                    customer,
+                    promoCode: state.promoCode || null,
+                    items: state.cart.map(i => ({ ...i })),
+                    totalUAH,
+                    shipping: 'Нова Пошта (за тарифами перевізника)',
+                    createdAt: new Date().toISOString()
+                };
+
+                let sentToBot = false;
+                if (tg && typeof tg.sendData === 'function' && tg.initData && tg.initData.length > 0) {
+                    try {
+                        tg.sendData(JSON.stringify(payload));
+                        sentToBot = true;
+                    } catch (err) {
+                        console.warn('tg.sendData error:', err);
+                    }
+                }
+
+                const summaryPlain = buildOrderSummaryText(customer);
+                const itemsHtml = state.cart
+                    .map(i => `<div>• ${i.name} (${i.size}) × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('uk-UA')} грн</div>`)
+                    .join('');
+
+                closeModal('cart-modal');
+
+                document.getElementById('conf-note').textContent = sentToBot
+                    ? 'Замовлення передано у Telegram-бот. Менеджер @Dobertryp зв’яжеться з вами для підтвердження.'
+                    : 'Замовлення сформовано. Ви можете одразу надіслати його деталі менеджеру @Dobertryp у Telegram.';
+
+                document.getElementById('conf-details').innerHTML = `
+                    <div><span style="color: var(--text-muted);">Отримувач:</span> ${customer.name}</div>
+                    <div><span style="color: var(--text-muted);">Телефон:</span> ${customer.phone}</div>
+                    <div><span style="color: var(--text-muted);">Доставка:</span> ${customer.city}, ${customer.novaPoshta}</div>
+                    <div><span style="color: var(--text-muted);">Оплата:</span> ${customer.payment}</div>
+                    <div><span style="color: var(--text-muted);">Тариф доставки:</span> Нова Пошта (оплата за тарифами перевізника)</div>
+                    <div style="padding-top: 6px; border-top: 1px solid var(--border-subtle);">${itemsHtml}</div>
+                    <div style="font-weight: 800; padding-top: 4px;">Сума товарів: ${totalUAH.toLocaleString('uk-UA')} грн</div>
+                `;
+
+                const confTgBtn = document.getElementById('conf-tg-btn');
+                confTgBtn.dataset.message = summaryPlain;
+
+                state.cart = [];
+                state.promoCode = '';
+                state.promoPercent = 0;
+                document.getElementById('promo-input').value = '';
+                document.getElementById('promo-feedback').hidden = true;
+                updateCartBadge();
+                renderCart();
+
+                openModal('confirmation-modal');
+            }
+
+            // =====================================================================
+            // 9. МОДАЛЬНІ ВІКНА, TOAST ТА КОПІЮВАННЯ НІКУ
+            // =====================================================================
+            function openModal(modalId) {
+                const el = document.getElementById(modalId);
+                if (!el) return;
+                el.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal(modalId) {
+                const el = document.getElementById(modalId);
+                if (!el) return;
+                el.hidden = true;
+
+                const anyOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => !m.hidden);
+                if (!anyOpen) {
+                    document.body.style.overflow = '';
+                }
+            }
+
+            let toastTimer = null;
+            function showToast(text) {
+                const toast = document.getElementById('toast');
+                toast.textContent = text;
+                toast.classList.add('is-visible');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('is-visible');
+                }, 2200);
+            }
+
+            function copyManagerNick() {
+                const temp = document.createElement('input');
+                temp.value = '@Dobertryp';
+                document.body.appendChild(temp);
+                temp.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Нік @Dobertryp скопійовано');
+                } catch (e) {
+                    showToast('@Dobertryp');
+                }
+                document.body.removeChild(temp);
+            }
+
+            // =====================================================================
+            // 10. ЄДИНЕ ДЕЛЕГУВАННЯ ПОДІЙ НА DOCUMENT
+            // =====================================================================
+            document.addEventListener('click', function (event) {
+                const actionEl = event.target.closest('[data-action]');
+                if (!actionEl) return;
+
+                const action = actionEl.dataset.action;
+
+                if (action === 'backdrop-close') {
+                    if (event.target === actionEl) {
+                        closeModal(actionEl.dataset.modal);
+                    }
+                    return;
+                }
+
+                switch (action) {
+                    case 'switch-tab': {
+                        switchTab(actionEl.dataset.tab);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        break;
+                    }
+                    case 'open-size-guide': {
+                        openModal('size-guide-modal');
+                        break;
+                    }
+                    case 'open-cart': {
+                        renderCart();
+                        openModal('cart-modal');
+                        break;
+                    }
+                    case 'close-modal': {
+                        closeModal(actionEl.dataset.modal);
+                        break;
+                    }
+                    case 'select-category': {
+                        state.activeCategory = actionEl.dataset.category;
+                        renderCategories();
+                        renderProducts();
+                        break;
+                    }
+                    case 'clear-search': {
+                        state.searchQuery = '';
+                        const sInput = document.getElementById('search-input');
+                        sInput.value = '';
+                        document.getElementById('clear-search-btn').hidden = true;
+                        renderProducts();
+                        break;
+                    }
+                    case 'reset-filters': {
+                        state.activeCategory = 'Усі';
+                        state.searchQuery = '';
+                        state.sortBy = 'default';
+                        document.getElementById('search-input').value = '';
+                        document.getElementById('clear-search-btn').hidden = true;
+                        document.getElementById('sort-select').value = 'default';
+                        renderCategories();
+                        renderProducts();
+                        break;
+                    }
+                    case 'select-size': {
+                        const id = actionEl.dataset.id;
+                        const size = actionEl.dataset.size;
+                        state.selectedSizes[id] = size;
+                        renderProducts();
+                        break;
+                    }
+                    case 'open-product': {
+                        openProductModal(actionEl.dataset.id);
+                        break;
+                    }
+                    case 'modal-select-size': {
+                        const id = actionEl.dataset.id;
+                        const size = actionEl.dataset.size;
+                        state.selectedSizes[id] = size;
+                        openProductModal(id);
+                        renderProducts();
+                        break;
+                    }
+                    case 'modal-add-to-cart': {
+                        if (state.modalProductId) {
+                            addToCart(state.modalProductId);
+                            closeModal('product-modal');
+                        }
+                        break;
+                    }
+                    case 'ask-about-product': {
+                        const product = PRODUCTS.find(p => p.id === state.modalProductId);
+                        if (product) {
+                            const size = state.selectedSizes[product.id] || 'M';
+                            openManagerChat(`Вітаю! Цікавить товар «${product.name}» у розмірі ${size} (${product.price} грн). Підкажіть щодо наявності та замірів.`);
+                        } else {
+                            openManagerChat('Вітаю! Хочу уточнити деталі щодо товару у NEBES6.');
+                        }
+                        break;
+                    }
+                    case 'add-to-cart': {
+                        addToCart(actionEl.dataset.id);
+                        break;
+                    }
+                    case 'cart-qty': {
+                        const idx = Number(actionEl.dataset.index);
+                        const delta = Number(actionEl.dataset.delta);
+                        if (state.cart[idx]) {
+                            state.cart[idx].quantity += delta;
+                            if (state.cart[idx].quantity <= 0) {
+                                state.cart.splice(idx, 1);
+                            }
+                            updateCartBadge();
+                            renderCart();
+                        }
+                        break;
+                    }
+                    case 'cart-remove': {
+                        const idx = Number(actionEl.dataset.index);
+                        if (state.cart[idx]) {
+                            state.cart.splice(idx, 1);
+                            updateCartBadge();
+                            renderCart();
+                        }
+                        break;
+                    }
+                    case 'apply-promo': {
+                        applyPromoCode();
+                        break;
+                    }
+                    case 'order-via-manager': {
+                        if (state.cart.length === 0) return;
+                        const customerDraft = {
+                            name: document.getElementById('input-name').value.trim(),
+                            phone: document.getElementById('input-phone').value.trim(),
+                            city: document.getElementById('input-city').value.trim(),
+                            novaPoshta: document.getElementById('input-np').value.trim(),
+                            payment: document.getElementById('input-payment').value,
+                            comment: document.getElementById('input-comment').value.trim()
+                        };
+                        openManagerChat(buildOrderSummaryText(customerDraft));
+                        break;
+                    }
+                    case 'open-tg-chat': {
+                        openManagerChat(actionEl.dataset.message || '');
+                        break;
+                    }
+                    case 'copy-manager': {
+                        copyManagerNick();
+                        break;
+                    }
+                }
             });
-        }
 
-        document.getElementById('product-modal').addEventListener('click', function (e) {
-            if (e.target === this) closeProductModal();
-        });
+            document.getElementById('search-input').addEventListener('input', function (e) {
+                state.searchQuery = e.target.value;
+                document.getElementById('clear-search-btn').hidden = state.searchQuery.trim() === '';
+                renderProducts();
+            });
 
-        document.getElementById('cart-modal').addEventListener('click', function (e) {
-            if (e.target === this) closeCart();
-        });
+            document.getElementById('sort-select').addEventListener('change', function (e) {
+                state.sortBy = e.target.value;
+                renderProducts();
+            });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initChromeSheen();
+            document.getElementById('checkout-form').addEventListener('submit', handleCheckoutSubmit);
+
+            // Початковий рендер
+            updateCartBadge();
             renderCategories();
             renderProducts();
-            updateCartUI();
-            lucide.createIcons();
-        });
+        })();
     </script>
 </body>
 </html>
